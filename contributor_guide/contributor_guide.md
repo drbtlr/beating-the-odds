@@ -4,7 +4,7 @@ author: 'Author: OpenSDP'
 date: "July 13, 2018"
 output:
   html_document:
-    css: ../docs/styles.css
+    css: ../includes/styles.css
     highlight: null
     keep_md: yes
     number_sections: no
@@ -40,7 +40,7 @@ is a powerful platform for collaboration around code and text, but does have a
 learning curve. This document is designed to help you get started using GitHub
 right away -- if you already have experience with git and GitHub then feel
 free to skip ahead to the sections on organization and structure of OpenSDP
-materials. 
+materials.
 
 ## Getting Started
 The best way to get started contributing to OpenSDP is to explore model analyses
@@ -99,10 +99,13 @@ started with formatting your repositories in the OpenSDP style.
 <br />
 
 ## Using GitHub for OpenSDP
-GitHub is a platform that allows OpenSDP contributors to share their code,
-collaborate with peers, and produce useful output for others to use. Here, we
-take you through the steps of initializing your work with OpenSDP's GitHub
-guidelines so that you can contribute to OpenSDP openly and effectively.
+
+OpenSDP tutorials and guides are built on GitHub - a platform for open source
+development and project hosting. GitHub is the platform that allows OpenSDP
+contributors to share their code, collaborate with peers, and produce useful
+output for others to use. Here, we take you through the steps of initializing
+your work with OpenSDP's GitHub guidelines so that you can contribute to
+OpenSDP.
 
 ### Step 1 (if applicable): Create GitHub account
 If you are new to GitHub, you can create an account here:
@@ -171,7 +174,7 @@ green "Clone or download" button
 
 ## Guide to folders and files
 The OpenSDP starter pack contains several folders, each with at least one file.
-As you see fit, feel free to add extra folders to your repositry, add files to
+As you see fit, feel free to add extra folders to your repository, add files to
 existing folders, and/or edit the starter files. However, "less is more" in this
 context, as a simple folder and file structure will allow others to follow your
 project more easily. Please, also, do not delete any starter pack files or
@@ -182,7 +185,7 @@ The following is a guide that explains the purpose behind each folder and file
 in the OpenSDP starter pack.
 
 ### Folder: `R`
-**Purpose:** Houses implementation of functions or other user-generated R tools
+**Purpose:** Stores functions or other user-generated R tools
 that are utilized in the main analysis code. Keeping this information in a
 separate folder reduces clutter in the main code and allows collaborators to
 see these tools in isolation.
@@ -206,7 +209,7 @@ Contains the following file(s):
 - `code_template.Rmd`
     - **File type:** R markdown
     - **Description:** Contains code, descriptions, and summaries that render the
-- final HTML analysis guide page, as displayed on OpenSDP's webiste.
+- final HTML analysis guide page, as displayed on OpenSDP's website.
     - **Guide for use:**
         - The R markdown code should follow a specific structure in terms of formatting
   descriptions, code chunks, headings, and attributions, so make sure to follow
@@ -221,7 +224,7 @@ Contains the following file(s):
         - The file must be R markdown. If you are new to using R markdown, don't fret:
   the coding functionality and syntax is essentially the same as it is in a
   normal R script. R markdown just contains extra functionality that allows you
-  to put text and images alongisde your code and render it as an HTML, making it
+  to put text and images alongside your code and render it as an HTML, making it
   more user-friendly for our site's visitors. Here is a useful guide to using R
   markdown: https://bookdown.org/yihui/rmarkdown/basics.html.
 
@@ -234,29 +237,6 @@ Contains the following file(s):
 - `contributor_guide.md`
     - **File type:** Markdown
     - **Description:** Provides steps and considerations for contributing analyses to OpenSDP.
-
-<br />
-
-- `sdp_coding_style_guide.pdf`
-    - **File type:** PDF
-    - **Description:** Guidelines for styling code in OpenSDP analyses,
-      including recommendations for indentation, comments, avoiding hard coding,
-      and more.
-    - **Guide for use:** Currently, the guide is written for Stata users. However,
-  the majority of the techniques described can be translated directly into R
-  code. See `code_template.Rmd` for brief examples of model R coding technique
-  or take a look at previously written code from other analyses on the OpenSDP
-  website.
-
-<br />
-
-- `sdp_data_specification_guide.pdf`
-    - **File type:** PDF
-    - **Description:** Guidelines for naming variables, cleaning data, and organizing data files.
-    - **Guide for use:** This guide is comprehensive and prepared for Strategic Data
-  Project Fellows. Likely, you will not have to use most of the information.
-  However, the conventions for naming dataset features are particularly
-  important and should be mimicked in your dataset and code.
 
 <br />
 
@@ -278,7 +258,7 @@ Contains the following file(s):
   student information. As OpenSDP is an open-source site, no private student
   data should be uploaded here or anywhere in your analysis.
 
-### Folder: `docs`
+### Folder: `includes`
 **Purpose:** Houses OpenSDP styling documents.
 
 Contains the following file(s):
@@ -326,6 +306,30 @@ Contains the following file(s):
     - **File type:** markdown
     - **Description:** Provides type, range, and meaning for each data feature.
 
+<br />
+- `sdp_coding_style_guide.pdf`
+  - **File type:** PDF
+  - **Description:** Guidelines for styling code in OpenSDP analyses,
+      including recommendations for indentation, comments, avoiding hard coding,
+      and more.
+  - **Guide for use:** Currently, the guide is written for Stata users. However,
+    the majority of the techniques described can be translated directly into R
+    code. See `code_template.Rmd` for brief examples of model R coding technique
+    or take a look at previously written code from other analyses on the OpenSDP
+    website.
+
+<br />
+
+- `sdp_data_specification_guide.pdf`
+  - **File type:** PDF
+  - **Description:** Guidelines for naming variables, cleaning data, and organizing data files.
+  - **Guide for use:** This guide is comprehensive and prepared for Strategic Data
+      Project Fellows. Likely, you will not have to use most of the information.
+      However, the conventions for naming dataset features are particularly
+      important and should be mimicked in your dataset and code.
+
+<br />
+
 ### File: `README.md`
 - **Description:** Provides an overall description of the GitHub repository and
 your analysis. Provides attribution and usage information.
@@ -336,6 +340,9 @@ your analysis. Provides attribution and usage information.
   individual/organization that provided support for the project in any way.
 
 ## Updating GitHub
+
+### Updating via the website
+
 When working with the above files on your computer locally, it is a good
 practice to periodically update the corresponding files in the GitHub
 repository. Doing so allows collaborators to see your progress and edits. In
@@ -345,7 +352,7 @@ versions, line by line. This is particularly useful with respect to code files.
 There are multiple ways to update files in GitHub, some more complicated than
 others. Here, we show simple ways to update two broad types of files:
 
-### Updating native GitHub files
+#### Updating native GitHub files
 Some files, especially code files, are rendered natively in GitHub. This is true
 of css, markdown, and Rmarkdown documents. To update such files, use a simple
 copy and paste method:
@@ -371,7 +378,7 @@ pencil tool on the file page, you will also see a `History` button. This shows
 the edits made to document during each update, line-by-line. Red indicates lines
 or expressions that were cut, and green indicates added material.
 
-### Updating non-native GitHub files
+#### Updating non-native GitHub files
 Many files do not render natively on GitHub, including HTML, CSV, PNG, Word, and
 many others. GitHub will not track changes to these files in updates. Instead,
 to update such files, you will have to delete and replace:
@@ -384,7 +391,7 @@ to update such files, you will have to delete and replace:
 - Drag your updated file to the box (or find via "choose your files")
 - Click "Commit changes"
 
-### Uploading new files
+#### Uploading new files
 To upload a new file to one of your GitHub repository folders:
 
 - Find the repository folder into which you would like to upload the new file and click into it
@@ -420,6 +427,22 @@ To upload a new **non-code** file to a new folder:
 - Upload the new file and commit the new file.
 - Navigate back into the folder you created and delete the `foo` file.
 
+### Updating Using Git (advanced)
+
+If you are comfortable using command line tools and programming languages, you
+may be interested in interacting with GitHub using the version control system
+"git". Git is a version control system for software code and serves as the
+underlying foundation of GitHub. Git is the industry standard for managing
+multiple authors for open source (and closed source) software development.
+
+Git is a fully functional software tool with
+many features and commands - a tutorial on it is beyond the scope of this guide.
+However, to learn more, there are a number of excellent resources you can
+access online to determine.
+
+[Git Online Manual](https://git-scm.com/docs/gittutorial)
+[GitHub Git Starter Guides](https://try.github.io/)
+
 ## Collaborating on GitHub
 GitHub's main function is to allow effective collaboration between coders. It
 has various tools geared towards this purpose. To get a sense of these tools at
@@ -439,6 +462,10 @@ To invite collaborators to your GitHub repository...
 - Click on "Settings"
 - Click on "Collaborators"
 - Add names of potential collaborators
+
+Note that you will need the GitHub usernames for any potential collaborators -
+if your collaborators don't have a GitHub account they'll need to create one
+in order to contribute.
 
 ### Flagging issues
 To track code fixes and improvements, it is useful to open issues. Issues create
