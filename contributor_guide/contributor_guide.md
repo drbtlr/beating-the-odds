@@ -4,7 +4,7 @@ author: 'Author: OpenSDP'
 date: "July 13, 2018"
 output:
   html_document:
-    css: ../docs/styles.css
+    css: ../includes/styles.css
     highlight: null
     keep_md: yes
     number_sections: no
@@ -240,29 +240,6 @@ Contains the following file(s):
 
 <br />
 
-- `sdp_coding_style_guide.pdf`
-    - **File type:** PDF
-    - **Description:** Guidelines for styling code in OpenSDP analyses,
-      including recommendations for indentation, comments, avoiding hard coding,
-      and more.
-    - **Guide for use:** Currently, the guide is written for Stata users. However,
-  the majority of the techniques described can be translated directly into R
-  code. See `code_template.Rmd` for brief examples of model R coding technique
-  or take a look at previously written code from other analyses on the OpenSDP
-  website.
-
-<br />
-
-- `sdp_data_specification_guide.pdf`
-    - **File type:** PDF
-    - **Description:** Guidelines for naming variables, cleaning data, and organizing data files.
-    - **Guide for use:** This guide is comprehensive and prepared for Strategic Data
-  Project Fellows. Likely, you will not have to use most of the information.
-  However, the conventions for naming dataset features are particularly
-  important and should be mimicked in your dataset and code.
-
-<br />
-
 - Subfolder: `img`
     - **Description:** Contains images used in `contributor_guide.md`.
 
@@ -281,7 +258,7 @@ Contains the following file(s):
   student information. As OpenSDP is an open-source site, no private student
   data should be uploaded here or anywhere in your analysis.
 
-### Folder: `docs`
+### Folder: `includes`
 **Purpose:** Houses OpenSDP styling documents.
 
 Contains the following file(s):
@@ -328,6 +305,30 @@ Contains the following file(s):
 - `data_description.md`
     - **File type:** markdown
     - **Description:** Provides type, range, and meaning for each data feature.
+
+<br />
+- `sdp_coding_style_guide.pdf`
+  - **File type:** PDF
+  - **Description:** Guidelines for styling code in OpenSDP analyses,
+      including recommendations for indentation, comments, avoiding hard coding,
+      and more.
+  - **Guide for use:** Currently, the guide is written for Stata users. However,
+    the majority of the techniques described can be translated directly into R
+    code. See `code_template.Rmd` for brief examples of model R coding technique
+    or take a look at previously written code from other analyses on the OpenSDP
+    website.
+
+<br />
+
+- `sdp_data_specification_guide.pdf`
+  - **File type:** PDF
+  - **Description:** Guidelines for naming variables, cleaning data, and organizing data files.
+  - **Guide for use:** This guide is comprehensive and prepared for Strategic Data
+      Project Fellows. Likely, you will not have to use most of the information.
+      However, the conventions for naming dataset features are particularly
+      important and should be mimicked in your dataset and code.
+
+<br />
 
 ### File: `README.md`
 - **Description:** Provides an overall description of the GitHub repository and
