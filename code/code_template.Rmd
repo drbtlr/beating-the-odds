@@ -5,7 +5,7 @@ date: "Jun 30, 2018 (Replace with date uploaded to OpenSDP)"
 output: 
   html_document:
     theme: simplex
-    css: ../docs/styles.css
+    css: ../includes/styles.css
     highlight: NULL
     keep_md: true
     toc: true
