@@ -307,6 +307,7 @@ Contains the following file(s):
     - **Description:** Provides type, range, and meaning for each data feature.
 
 <br />
+
 - `sdp_coding_style_guide.pdf`
   - **File type:** PDF
   - **Description:** Guidelines for styling code in OpenSDP analyses,
