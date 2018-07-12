@@ -13,7 +13,7 @@ This repository is organized in the following folder structure:
 - `R` contains R functions necessary to complete the analysis
 - `data` contains data necessary to complete the analysis
 - `img` contains images to format the guides
-- `docs` contains style assets to format the guides
+- `includes` contains style assets to format the guides
 - `man` contains the manuals and descriptive files of the data
 
 These materials were originally authored by **YOURE NAME HERE**.
