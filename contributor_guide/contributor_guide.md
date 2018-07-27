@@ -25,12 +25,12 @@ output:
 
 ## Contributor Guide
 
-The purpose of this document is to provide authors and contributors to the OpenSDP
-project with instructions on how to produce guidelines, tutorials, and tools
-that are suitable for publication and inclusion in the OpenSDP repository. This
-guide reviews some of the key features of an OpenSDP contribution, introduces
-potential contributors to GitHub, and explains the organizational structure
-of OpenSDP materials.
+The purpose of this document is to provide authors and contributors to the 
+OpenSDP project with instructions on how to produce guidelines, tutorials, and 
+tools that are suitable for publication and inclusion in the OpenSDP repository.
+This guide reviews some of the key features of an OpenSDP contribution, 
+introduces potential contributors to GitHub, and explains the organizational 
+structure of OpenSDP materials.
 
 ### Key Features of Contributing to OpenSDP
 
@@ -48,8 +48,8 @@ on the OpenSDP website. We recommend reviewing the "College Persistence"
 analysis in the R programming language on the OpenSDP Analysis page, here:
 https://opensdp.github.io/analysis/.
 
-Within the OpenSDP Analysis page, the "College Persistence" analysis section will
-look like this:
+Within the OpenSDP Analysis page, the "College Persistence" analysis section 
+will look like this:
 
 <br />
 
@@ -106,6 +106,14 @@ contributors to share their code, collaborate with peers, and produce useful
 output for others to use. Here, we take you through the steps of initializing
 your work with OpenSDP's GitHub guidelines so that you can contribute to
 OpenSDP.
+
+Steps 1-3 are meant for beginning-level GitHub users. Step 4 (advanced) is meant
+for those already familiar with using Git and/or GitHub. Please skip to step 4
+if you fall into the latter category. Beginning-level users do not need to 
+follow step 4 to contribute to OpenSDP. 
+
+In addition, those familiar Git and/or GitHub can skip the "Updating GitHub" and
+"Collaborating on GitHub" sections that appear later in this guide.
 
 ### Step 1 (if applicable): Create GitHub account
 If you are new to GitHub, you can create an account here:
@@ -171,6 +179,10 @@ to) your analysis.
 green "Clone or download" button
 - In the drop down menu, click "download ZIP"
 - Extract this zip folder to your computer
+
+### Step 4 (advanced): Contribute to OpenSDP using Git
+
+TODO
 
 ## Guide to folders and files
 The OpenSDP starter pack contains several folders, each with at least one file.
@@ -336,7 +348,7 @@ Contains the following file(s):
 your analysis. Provides attribution and usage information.
 - **File type:** markdown
 - **Guide for usage**: Provide a brief description of the purpose of your
-  analysis in place of "Inser goal of analysis here." Add attribution
+  analysis in place of "Inset goal of analysis here." Add attribution
   information for collaborators on the project or for any
   individual/organization that provided support for the project in any way.
 
@@ -402,7 +414,7 @@ To upload a new file to one of your GitHub repository folders:
 
 While uploading a new file to a folder that already exists in your repository is
 fairly simple, creating a new folder in GitHub and uploading a new file to that
-folder can be suprisingly tricky (GitHub does not allow for the creation of new
+folder can be surprisingly tricky (GitHub does not allow for the creation of new
 blank folders):
 
 To upload a new **code or markdown** file to a new folder:
@@ -449,7 +461,7 @@ GitHub's main function is to allow effective collaboration between coders. It
 has various tools geared towards this purpose. To get a sense of these tools at
 large, visit GitHub's flow guide: https://guides.github.com/introduction/flow/.
 In particular, the flow guide provides an introduction to using branches and
-pulls, which are some of the most effectives functions for collaboration in
+pulls, which are some of the most effective functions for collaboration in
 GitHub.
 
 The flow guide is the best resource to get you started with higher-level GitHub
