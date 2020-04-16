@@ -1,11 +1,11 @@
-# file:     butler-mock-analysis.R
+# file:     mock-analysis.R
 # author:   Aaron Butler
 # date:     14-Apr-2020
 # purpose:  Mock analysis 
 
 # NOTES
-# - 
-# - 
+# - replace missing values?
+# - include model checks
 
 # load packages
 library(tidyverse)
@@ -109,13 +109,56 @@ m_read <- lmer(
 
 summary(m_read)
 
-### START HERE ----------------------------------------------------------------------
-
 # access level-2 residuals
+resids_math <- ranef(m_math, level = 2)
+resids_read <- ranef(m_read, level = 2)
 
 
 # step 4: determine BTO ----
 
+# create function to flag BTO schools
+calc_bto <- function(.resids) {
+  .resids %>%
+    # store as a dataframe
+    data.frame() %>% 
+    # set benchmarks at +/- 2 standard deviations
+    mutate(pos_bench = condsd * 1.96,
+           neg_bench = condsd * -1.96,) %>% 
+    # flag schools that perferm above/below benchmark (i.e., BTOs)
+    mutate(sig = ifelse(condval >= pos_bench | condval <= neg_bench, "yes", "no"))
+}
+
+# execute function for each subject area
+bto_math <- calc_bto(resids_math) %>% 
+  # keep variables of interest
+  # note: select and rename variables at the same time
+  select(first_hs_code=grp, resid_math=condval, resid_sd_math=condsd, bto_math=sig)
+  
+bto_read <- calc_bto(resids_read) %>% 
+  select(first_hs_code=grp, resid_read=condval, resid_sd_read=condsd, bto_read=sig)
+
+# merge datsets for plotting
+
+# merge bto datasets
+bto_read_math <- left_join(bto_read, bto_math, by = "first_hs_code") %>% 
+  # conver to numeric for merge
+  mutate(first_hs_code = as.numeric(first_hs_code))
+
+# pull school and district info from original dataset
+df_names <- faketucky %>% 
+  select(first_dist_code, first_hs_code, first_dist_name, first_hs_name) %>% 
+  distinct()
+
+# merge bto + school info datasets
+df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
+
+
 # step 5: plot ----
 
+# scatter plt math/read
+ggplot(df_bto, aes(resid_math, resid_read)) +
+  geom_point()
 
+# bar plot sm/me/lg change
+# table sm/med/lg change
+#bar plot perf by stn groups (need to add sch char data)
