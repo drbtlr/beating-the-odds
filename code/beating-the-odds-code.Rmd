@@ -1,0 +1,168 @@
+---
+title: "Beating the Odds"
+author: "Aaron Butler, Hannah Poquette"
+date: "Jun 30, 2018 (Replace with date uploaded to OpenSDP)"
+output: 
+  html_document:
+    theme: simplex
+    css: ../includes/styles.css
+    highlight: NULL
+    keep_md: true
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: false
+---
+
+# Implementing a Beating the Odds Analysis 
+
+*A step-by-step guide to implementing a beating the odds analysis using a multilevel framework. Programmed in R*
+
+```{r knitrSetup, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, comment=NA}
+# Set options for knitr
+library(knitr)
+knitr::opts_chunk$set(comment=NA, warning=FALSE, echo=TRUE,
+                      root.dir = normalizePath("../"),
+                      error=FALSE, message=FALSE, fig.align='center',
+                      fig.width=8, fig.height=6, dpi = 144, 
+                      fig.path = "../figure/E_", 
+                      cache.path = "../cache/E_")
+options(width=80)
+```
+
+<div class="navbar navbar-default navbar-fixed-top" id="logo">
+<div class="container">
+<img src="../img/open_sdp_logo_red.png" style="display: block; margin: 0 auto; height: 115px;">
+</div>
+</div>
+
+## Getting Started
+
+### Objective
+
+In this guide, you will be able to use statistical models to predict school performance based on the demographic makeup of schools' student populations and compare these predictions with actual school performance. 
+
+### Purpose and Overview of Analyses
+
+School leaders often want to identify promising practices that distinguish high-performing schools from their counterparts and facilitate the transfer of some of these practices to struggling schools. A beating the odds analysis is one approach school leaders can take to identify schools that perform better than expected, given the unique student populations they serve.
+
+The purpose of this guide is to present a data-driven approach to identify beating-the-odds schools. We use multilevel models to predict student performance and school-level effects on that performance. Next, we compare each school's predicted performance to its actual performance. The school is identified as beating the odds if its actual performance is higher than predicted by a statistically significant margin. The procedures presented in this guide parellel those used in a collaborative study by the [Kentucky Department of Education](https://education.ky.gov/) and [REL Appalachia](https://ies.ed.gov/ncee/edlabs/regions/appalachia/).
+
+### Using this Guide
+
+This guide utilizes SDP's ["Faketucky"](https://github.com/opensdp/faketucky), a synthetic dataset based on real student data. While the data is synthetic, the code is not. Schools and districts wanting to conduct their own beating the odds analyses can easily adapt the code provided in this guide to their own data.
+
+Once you have identified analyses that you want to try to replicate or modify, click the "Download" buttons to download R code and sample data. You can make changes to the charts using the code and sample data, or modify the code to work with your own data. If you are familiar with Github, you can click "Go to Repository" and clone the entire repository to your own computer. 
+
+Go to the Participate page to read about more ways to engage with the OpenSDP community or reach out for assistance in adapting this code for your specific context.
+
+### Installing and Loading R Packages
+
+To complete this tutorial, you will need R, R Studio, and the following R packages installed on your machine: 
+
+- `tidyverse`: For convenient data and output manipulation
+- `lme4`: To fit multilevel models
+
+To install packages, such as `lme4`, run the following command in the R console:
+
+`install.packages("lme4")`
+
+In addition, this guide will draw from OpenSDP-written functions defined in the `functions.R` document, which is located in the `R` folder of this guide's GitHub repository. Please make sure to have downloaded the entire GitHub repository to run this code.
+
+After you installed your R packages and downloaded this guide's GitHub repository, run the chunk of code below to load them onto your computer.
+
+```{r load-packages, echo=TRUE}
+# Load packages
+library(tidyverse)
+library(lme4)
+
+# Read in some R functions that are convenience wrappers
+source("../R/functions.R")
+```
+
+### About the Data
+
+This guide uses SDP's ["Faketucky"](https://github.com/opensdp/faketucky) dataset. The Faketucky synthetic college-going analysis file contains high school and college outcome data for two graduating cohorts of approximately 40,000 students. There are no real children in the dataset, but it mirrors the relationships between variables present in real data. The dataset was developed as an offshoot of SDP's [college-going diagnostic for Kentucky](https://cepr.harvard.edu/publications/sdp-college-going-diagnostic-kentucky), using the R [synthpop](https://cran.r-project.org/web/packages/synthpop/index.html) package.
+
+Below is a list of variables and descriptions used in the analyses:
+
+**UPDATE TABLE**
+
+| Variable Name    | Variable Description                                 |
+|:-----------      |:------------------                                   |
+| `grade_level`    | Grade level of exam student took (3-8)               |
+| `school_code`    | School ID number                                     |
+| `sid`            | Student ID number                                    | 
+| `male`           | Student gender                                       |
+| `race_ethnicity` | Student race/ethnicity                               |
+| `eco_dis`        | Student level of economic disadvantage               |
+| `lep`            | Level of Limited English Proficiency                 |
+| `iep`            | Indicator if student enrolled in special education   |
+| `rdg_ss`         | Scale score for reading exam                         |
+| `math_ss`        | Scale score for math exam                            |
+
+#### Loading the Dataset
+
+```{r load-data, echo=FALSE}
+# Load "Faketucky" data file
+load("../data/faketucky.rda")
+
+# Select variables of interest
+faketucky <- faketucky_20160923 %>% 
+  select(-starts_with("enroll"), 
+         -starts_with("ihe"))
+
+# Check out the data
+glimpse(faketucky)
+```
+
+### Giving Feedback on this Guide
+ 
+This guide is an open-source document hosted on Github and generated using R Markdown. We welcome feedback, corrections, additions, and updates. Please visit the OpenSDP equity metrics repository to read our contributor guidelines.
+
+## Analyses
+
+### Exploratory Analysis
+
+**The following is an example of what the beginning structure of an analysis component may look like**
+
+**Purpose:** Descriptive statistics give your agency a quick snapshot of current achievement gaps among students, identifying areas for further investigation and analysis.
+
+**Required Analysis File Variables:**
+
+- `grade_level` 
+- `male`        
+- `race_ethnicity` 
+- `eco_dis`      
+- `lep`
+- `iep`
+- `rdg_ss`
+- `math_ss`
+
+**Ask Yourself**
+
+- How do different study subpopulations in your organization perform on standardized tests? How do they compare?
+- Why do these differences occur?
+- What differences do you want to explore further?
+
+**Analytic Technique:** Calculate the summary statistics for exam performance, for all 5th and 8th grade exam takers. Summary statistics provide us with broad points of comparison before we start breaking down the data by student population.
+
+```{r Averages, echo=TRUE}
+# // Step 1: Set which tested grade levels to analyze (5th and 8th here)
+grades <- c("5","8")
+
+# // Step 2: Set which tested subjects to analyze (math and reading here)
+subjects <- c("rdg_ss","math_ss")
+
+# // Step 3: Calculate summary stats for each grade level
+# Loop over grade level
+for(grade in grades){
+  
+  data = df[df$grade_level == grade,] #Isolates grade level
+  print(paste("grade level: ",grade))
+  a <- summary(data[,subjects]) #Summary stats table for grade
+  print(a) #Print summary table
+  
+} #End loop over grade level
+
+```
