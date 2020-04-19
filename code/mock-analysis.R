@@ -132,10 +132,10 @@ calc_bto <- function(.resids) {
 bto_math <- calc_bto(resids_math) %>% 
   # keep variables of interest
   # note: select and rename variables at the same time
-  select(first_hs_code=grp, resid_math=condval, resid_sd_math=condsd, bto_math=sig)
+  select(first_hs_code=grp, resid_math=condval, bto_math=sig)
   
 bto_read <- calc_bto(resids_read) %>% 
-  select(first_hs_code=grp, resid_read=condval, resid_sd_read=condsd, bto_read=sig)
+  select(first_hs_code=grp, resid_read=condval, bto_read=sig)
 
 # merge datsets for plotting
 
@@ -155,10 +155,61 @@ df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
 
 # step 5: plot ----
 
-# scatter plt math/read
+# scatter plt math/read residuals
 ggplot(df_bto, aes(resid_math, resid_read)) +
   geom_point()
 
 # bar plot sm/me/lg change
+
+# START HERE --------------------------------------------------------
+# - this is not correct
+
+# calc std div of actuals
+faketucky %>% 
+  summarise(sd_math = sd(scale_score_11_math, na.rm = TRUE),
+            sd_read = sd(scale_score_11_read, na.rm = TRUE))
+
+val_math <- 4.71
+val_read <- 6.03
+
+xx <- df_bto %>% 
+  # perf cut points, by subject
+  mutate(perf_cut_math = case_when(
+    resid_math < .25 * val_math ~ "very small",
+    resid_math >= .25 * val_math & resid_math < .5 * val_math ~ "small",
+    resid_math >= .5 * val_math & resid_math < .75 * val_math ~ "medium",
+    resid_math >= .75 * val_math ~ "large"
+  )) %>% 
+  mutate(perf_cut_read = case_when(
+    resid_read < .25 * val_read ~ "very small",
+    resid_read >= .25 * val_read & resid_read < .5 * val_read ~ "small",
+    resid_read >= .5 * val_read & resid_read < .75 * val_read ~ "medium",
+    resid_read >= .75 * val_read ~ "large"
+  ))
+
+
 # table sm/med/lg change
-#bar plot perf by stn groups (need to add sch char data)
+
+# bar plot perf by stn groups (need to add sch char data)
+
+df_sch_avg %>% 
+  filter(chrt_ninth == 2010) %>% 
+  glimpse
+
+# mock math
+# - make pretty
+# - create fun and plot math and reading together
+df_bto %>% 
+  left_join(df_sch_avg %>% 
+              filter(chrt_ninth == 2010), 
+            by = "first_hs_code") %>% 
+  drop_na(bto_math) %>% 
+  group_by(bto_math) %>% 
+  summarise(prop_white = mean(sch_white, na.rm = TRUE),
+            prop_frpl = mean(sch_frpl, na.rm = TRUE),
+            prop_sped = mean(sch_sped, na.rm = TRUE),
+            prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
+  pivot_longer(cols = starts_with("prop")) %>% 
+  ggplot(aes(name, value, fill = bto_math)) +
+  geom_col(position = "dodge")
+
