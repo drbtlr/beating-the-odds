@@ -109,9 +109,9 @@ m_read <- lmer(
 
 summary(m_read)
 
-# access level-2 residuals
-resids_math <- ranef(m_math, level = 2)
-resids_read <- ranef(m_read, level = 2)
+# access school-level residuals
+resids_math <- ranef(m_math)
+resids_read <- ranef(m_read)
 
 
 # step 4: determine BTO ----
@@ -121,7 +121,7 @@ calc_bto <- function(.resids) {
   .resids %>%
     # store as a dataframe
     data.frame() %>% 
-    # set benchmarks at +/- 2 standard deviations
+    # set benchmark at +2 standard deviations
     mutate(pos_bench = condsd * 1.96,
            neg_bench = condsd * -1.96,) %>% 
     # flag schools that perferm above/below benchmark (i.e., BTOs)
@@ -132,10 +132,10 @@ calc_bto <- function(.resids) {
 bto_math <- calc_bto(resids_math) %>% 
   # keep variables of interest
   # note: select and rename variables at the same time
-  select(first_hs_code=grp, resid_math=condval, bto_math=sig)
+  select(first_hs_code=grp, resid_math=condval, resid_sd_math=condsd, bto_math=sig)
   
 bto_read <- calc_bto(resids_read) %>% 
-  select(first_hs_code=grp, resid_read=condval, bto_read=sig)
+  select(first_hs_code=grp, resid_read=condval, resid_sd_read=condsd, bto_read=sig)
 
 # merge datsets for plotting
 
@@ -157,41 +157,59 @@ df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
 
 # scatter plt math/read residuals
 ggplot(df_bto, aes(resid_math, resid_read)) +
-  geom_point()
+  geom_point(aes(color = bto_math))
 
 # bar plot sm/me/lg change
+df_bto %>% 
+  ggplot(aes(resid_math)) +
+  geom_histogram(aes(fill=bto_math))
 
-# START HERE --------------------------------------------------------
-# - this is not correct
+summary(df_bto$resid_math)
+summary(df_bto$resid_read)
 
-# calc std div of actuals
-faketucky %>% 
-  summarise(sd_math = sd(scale_score_11_math, na.rm = TRUE),
-            sd_read = sd(scale_score_11_read, na.rm = TRUE))
-
-val_math <- 4.71
-val_read <- 6.03
-
-xx <- df_bto %>% 
-  # perf cut points, by subject
-  mutate(perf_cut_math = case_when(
-    resid_math < .25 * val_math ~ "very small",
-    resid_math >= .25 * val_math & resid_math < .5 * val_math ~ "small",
-    resid_math >= .5 * val_math & resid_math < .75 * val_math ~ "medium",
-    resid_math >= .75 * val_math ~ "large"
+df_cuts <- df_bto %>% 
+  # set cut for math
+  mutate(perf_math = case_when(
+    # no diff
+    bto_math == "no" ~ 0,
+    # sig positive diff
+    bto_math == "yes" & between(resid_math, 0, .5) ~ 1,
+    bto_math == "yes" & between(resid_math, .5, 1) ~ 2,
+    bto_math == "yes" & resid_math > 1 ~ 3,
+    # sig negative diff
+    bto_math == "yes" & between(resid_math, -.5, 0) ~ -1,
+    bto_math == "yes" & between(resid_math, -1, -.5) ~ -2,
+    bto_math == "yes" & resid_math < -1 ~ -3
   )) %>% 
-  mutate(perf_cut_read = case_when(
-    resid_read < .25 * val_read ~ "very small",
-    resid_read >= .25 * val_read & resid_read < .5 * val_read ~ "small",
-    resid_read >= .5 * val_read & resid_read < .75 * val_read ~ "medium",
-    resid_read >= .75 * val_read ~ "large"
+  # set cut for reading
+  mutate(perf_read = case_when(
+    # no diff
+    bto_read == "no" ~ 0,
+    # sig positive diff
+    bto_read == "yes" & between(resid_read, 0, .5) ~ 1,
+    bto_read == "yes" & between(resid_read, .5, 1) ~ 2,
+    bto_read == "yes" & resid_read > 1 ~ 3,
+    # sig negative diff
+    bto_read == "yes" & between(resid_read, -.5, 0) ~ -1,
+    bto_read == "yes" & between(resid_read, -1, -.5) ~ -2,
+    bto_read == "yes" & resid_read < -1 ~ -3
   ))
 
+df_cuts %>% 
+  count(perf_math, perf_read) %>% 
+  pivot_longer(-n) %>% 
+  ggplot(aes(value, n, fill=name)) +
+  geom_col(position = "dodge")
 
 # table sm/med/lg change
-
+df_cuts %>% 
+  count(perf_math, perf_read) %>%
+  ggplot(aes(perf_math, perf_read)) +
+  geom_tile(aes(fill = log(n))) +
+  geom_text(aes(label = n)) +
+  scale_fill_gradient(low = "#f8d14c", high = "#2c9fd1") 
+  
 # bar plot perf by stn groups (need to add sch char data)
-
 df_sch_avg %>% 
   filter(chrt_ninth == 2010) %>% 
   glimpse
