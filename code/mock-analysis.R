@@ -52,7 +52,9 @@ df_sch_avg <- faketucky %>%
          sch_frpl = mean(frpl_ever_in_hs, na.rm = TRUE),
          sch_sped = mean(sped_ever_in_hs, na.rm = TRUE),
          sch_lep = mean(lep_ever_in_hs, na.rm = TRUE),
-         sch_gifted = mean(gifted_ever_in_hs, na.rm = TRUE)) %>% 
+         sch_gifted = mean(gifted_ever_in_hs, na.rm = TRUE),
+         sch_8_math = mean(scale_score_8_math, na.rm = TRUE),
+         sch_8_read = mean(scale_score_8_read, na.rm = TRUE)) %>% 
   # remember to ungroup
   ungroup()
 
@@ -71,7 +73,9 @@ df_center <- df_sch_avg %>%
          sch_frpl_mean_year = mean(sch_frpl, na.rm = TRUE),
          sch_sped_mean_year = mean(sch_sped, na.rm = TRUE),
          sch_lep_mean_year = mean(sch_lep, na.rm = TRUE),
-         sch_gifted_mean_year = mean(sch_gifted, na.rm = TRUE)) %>% 
+         sch_gifted_mean_year = mean(sch_gifted, na.rm = TRUE),
+         sch_8_math_mean_year = mean(sch_8_math, na.rm = TRUE),
+         sch_8_read_mean_year = mean(sch_8_read, na.rm = TRUE)) %>% 
   # remember to ungroup
   ungroup() %>% 
   # center school-level variables
@@ -80,7 +84,9 @@ df_center <- df_sch_avg %>%
          sch_frpl_center = sch_frpl - sch_frpl_mean_year,
          sch_sped_center = sch_sped - sch_sped_mean_year,
          sch_lep_center = sch_lep - sch_lep_mean_year,
-         sch_gifted_center = sch_gifted - sch_gifted_mean_year)
+         sch_gifted_center = sch_gifted - sch_gifted_mean_year,
+         sch_8_math_center = sch_8_math - sch_8_math_mean_year,
+         sch_8_read_center = sch_8_read - sch_8_read_mean_year)
 
 # step 3: model ----
 
@@ -91,7 +97,7 @@ m_math <- lmer(
     lep_ever_in_hs + gifted_ever_in_hs + scale_score_8_math_center + 
     sch_male_center + sch_white_center + sch_frpl_center +
     sch_sped_center + sch_lep_center + sch_gifted_center +
-    flag_2010_cohort + (1|first_hs_code),
+    sch_8_math_center + flag_2010_cohort + (1|first_hs_code),
   data = df_center, REML = TRUE
 )
 
@@ -103,7 +109,7 @@ m_read <- lmer(
     lep_ever_in_hs + gifted_ever_in_hs + scale_score_8_read_center + 
     sch_male_center + sch_white_center + sch_frpl_center +
     sch_sped_center + sch_lep_center + sch_gifted_center +
-    flag_2010_cohort + (1|first_hs_code),
+    sch_8_read_center + flag_2010_cohort + (1|first_hs_code),
   data = df_center, REML = TRUE
 )
 
@@ -194,6 +200,9 @@ df_cuts <- df_bto %>%
     bto_read == "yes" & between(resid_read, -1, -.5) ~ -2,
     bto_read == "yes" & resid_read < -1 ~ -3
   ))
+
+df_cuts %>% count(bto_math) %>% mutate(pct = n/sum(n))
+df_cuts %>% count(perf_math) %>% mutate(pct = n/sum(n))
 
 df_cuts %>% 
   count(perf_math, perf_read) %>% 
