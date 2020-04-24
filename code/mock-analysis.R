@@ -162,8 +162,26 @@ df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
 # step 5: plot ----
 
 # scatter plt math/read residuals
-ggplot(df_bto, aes(resid_math, resid_read)) +
-  geom_point(aes(color = bto_math))
+df_bto %>% 
+  mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes", "BTO School", "Not a BTO School")) %>% 
+  filter(!is.na(bto_both)) %>% 
+  ggplot(aes(resid_math, resid_read, color = bto_both)) +
+  geom_point(size = 2, alpha = .6) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  scale_color_manual(values = c("#D55E00", "#999999")) +
+  theme_bw() +
+  theme(plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 11),
+        legend.position = "bottom",
+        legend.text = element_text(size = 11)) +
+  labs(x = "Math",
+       y = "Reading",
+       color = "",
+       title = "BTO Schools in Math and Reading",
+       subtitle = "Two-year status model (actual - predicted), 2010")
 
 # bar plot sm/me/lg change
 df_bto %>% 
@@ -204,11 +222,49 @@ df_cuts <- df_bto %>%
 df_cuts %>% count(bto_math) %>% mutate(pct = n/sum(n))
 df_cuts %>% count(perf_math) %>% mutate(pct = n/sum(n))
 
-df_cuts %>% 
-  count(perf_math, perf_read) %>% 
-  pivot_longer(-n) %>% 
-  ggplot(aes(value, n, fill=name)) +
-  geom_col(position = "dodge")
+# plot sm/med/lg change
+df_math <- df_cuts %>% 
+  count(perf_math) %>% 
+  mutate(subject = "Math") %>% 
+  select(subject, cut = perf_math, n)
+
+df_read <- df_cuts %>% 
+  count(perf_read) %>% 
+  mutate(subject = "Reading") %>% 
+  select(subject, cut = perf_read, n)
+
+bind_rows(df_math, df_read) %>% 
+  mutate(cut = case_when(
+    cut == -3 ~ "Large\nnegative\ndecrease",
+    cut == -2 ~ "Medium\nnegative\ndecrease",
+    cut == -1 ~ "Small\nnegative\ndecrease",
+    cut == 0 ~ "No\nsignificant\ndecrease",
+    cut == 1 ~ "Small\npositive\nincrease",
+    cut == 2 ~ "Medium\npositive\nincrease",
+    cut == 3 ~ "Large\npositive\nincrease"
+  )) %>% 
+  mutate(cut = fct_relevel(cut, "Large\nnegative\ndecrease", 
+                           "Medium\nnegative\ndecrease", "Small\nnegative\ndecrease", 
+                           "No\nsignificant\ndecrease", "Small\npositive\nincrease", 
+                           "Medium\npositive\nincrease", "Large\npositive\nincrease")) %>% 
+  filter(!is.na(cut)) %>% 
+  ggplot(aes(cut, n, fill = subject)) +
+  geom_col(position = position_dodge(.85), width = .8) +
+  geom_text(aes(label = n),
+            position = position_dodge(.85), vjust = -.45) +
+  scale_fill_manual(values = c("#D55E00", "#999999")) +
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        axis.title.y = element_text(size = 12),
+        axis.title.x = element_blank(),
+        axis.text = element_text(size = 11),
+        legend.position = "bottom",
+        legend.text = element_text(size = 11)) +
+  labs(x = "", y = "Number of School", fill = "",
+       title = "Distribution of BTO Schools in Math and Reading")
 
 # table sm/med/lg change
 df_cuts %>% 
@@ -217,26 +273,132 @@ df_cuts %>%
   geom_tile(aes(fill = log(n))) +
   geom_text(aes(label = n)) +
   scale_fill_gradient(low = "#f8d14c", high = "#2c9fd1") 
-  
-# bar plot perf by stn groups (need to add sch char data)
-df_sch_avg %>% 
-  filter(chrt_ninth == 2010) %>% 
-  glimpse
 
-# mock math
-# - make pretty
-# - create fun and plot math and reading together
-df_bto %>% 
-  left_join(df_sch_avg %>% 
-              filter(chrt_ninth == 2010), 
-            by = "first_hs_code") %>% 
-  drop_na(bto_math) %>% 
-  group_by(bto_math) %>% 
+df_cuts %>%
+  mutate(perf_math = case_when(
+    perf_math == -3 ~ "Large\nnegative\ndecrease",
+    perf_math == -2 ~ "Medium\nnegative\ndecrease",
+    perf_math == -1 ~ "Small\nnegative\ndecrease",
+    perf_math == 0 ~ "No\nsignificant\ndecrease",
+    perf_math == 1 ~ "Small\npositive\nincrease",
+    perf_math == 2 ~ "Medium\npositive\nincrease",
+    perf_math == 3 ~ "Large\npositive\nincrease"
+  )) %>% 
+  mutate(perf_math = fct_relevel(perf_math, "Large\nnegative\ndecrease", 
+                                 "Medium\nnegative\ndecrease", "Small\nnegative\ndecrease", 
+                                 "No\nsignificant\ndecrease", "Small\npositive\nincrease", 
+                                 "Medium\npositive\nincrease", "Large\npositive\nincrease")) %>%
+  mutate(perf_read = case_when(
+    perf_read == -3 ~ "Large\nnegative\ndecrease",
+    perf_read == -2 ~ "Medium\nnegative\ndecrease",
+    perf_read == -1 ~ "Small\nnegative\ndecrease",
+    perf_read == 0 ~ "No\nsignificant\ndecrease",
+    perf_read == 1 ~ "Small\npositive\nincrease",
+    perf_read == 2 ~ "Medium\npositive\nincrease",
+    perf_read == 3 ~ "Large\npositive\nincrease"
+  )) %>% 
+  mutate(perf_read = fct_relevel(perf_read, "Large\nnegative\ndecrease", 
+                                 "Medium\nnegative\ndecrease", "Small\nnegative\ndecrease", 
+                                 "No\nsignificant\ndecrease", "Small\npositive\nincrease", 
+                                 "Medium\npositive\nincrease", "Large\npositive\nincrease")) %>%
+  drop_na(perf_math, perf_read) %>%
+  count(perf_math, perf_read) %>%
+  ggplot(aes(perf_math, perf_read)) +
+  geom_tile(fill = "white") +
+  geom_text(aes(label = n)) +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 11)) +
+  labs(x = "Math Performance", y = "Reading Performance",
+       title = "School Counts by Performance Categories for Math and Reading")
+
+# bar plot perf by stn groups (need to add sch char data)
+grp_all <- df_sch_avg %>% 
+  filter(chrt_ninth == 2010) %>% 
+  summarise(prop_white = mean(sch_white, na.rm = TRUE),
+            prop_frpl = mean(sch_frpl, na.rm = TRUE),
+            prop_sped = mean(sch_sped, na.rm = TRUE),
+            prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
+  mutate(group = "All students") %>% 
+  pivot_longer(-group)
+
+grp_math <- df_cuts %>%
+  mutate(perf_math_high_low = case_when(
+    perf_math > 0 ~ "High performing",
+    perf_math < 0 ~ "Low performing",
+    perf_math == 0 ~ "Other"
+  )) %>%
+  left_join(df_sch_avg %>% filter(chrt_ninth == 2010)) %>% 
+  drop_na(perf_math_high_low) %>% 
+  group_by(perf_math_high_low) %>% 
   summarise(prop_white = mean(sch_white, na.rm = TRUE),
             prop_frpl = mean(sch_frpl, na.rm = TRUE),
             prop_sped = mean(sch_sped, na.rm = TRUE),
             prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
   pivot_longer(cols = starts_with("prop")) %>% 
-  ggplot(aes(name, value, fill = bto_math)) +
-  geom_col(position = "dodge")
+  rename(group = perf_math_high_low)
 
+grp_read <- df_cuts %>%
+  mutate(perf_read_high_low = case_when(
+    perf_read > 0 ~ "High performing",
+    perf_read < 0 ~ "Low performing",
+    perf_read == 0 ~ "Other"
+  )) %>%
+  left_join(df_sch_avg %>% filter(chrt_ninth == 2010)) %>% 
+  drop_na(perf_read_high_low) %>% 
+  group_by(perf_read_high_low) %>% 
+  summarise(prop_white = mean(sch_white, na.rm = TRUE),
+            prop_frpl = mean(sch_frpl, na.rm = TRUE),
+            prop_sped = mean(sch_sped, na.rm = TRUE),
+            prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
+  pivot_longer(cols = starts_with("prop")) %>% 
+  rename(group = perf_read_high_low) 
+
+# plot math
+bind_rows(grp_all, grp_math) %>% 
+  mutate(group = fct_relevel(group, "All students", "High performing",
+                             "Low performing", "Other")) %>% 
+  mutate(value = value * 100) %>% 
+  ggplot(aes(name, value, fill = group)) +
+  geom_col(position = position_dodge(.85), width = .8) +
+  geom_text(aes(label = round(value, 1)),
+            position = position_dodge(.85), vjust = -.45) +
+  scale_fill_grey() +
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        axis.title.y = element_text(size = 12),
+        axis.title.x = element_blank(),
+        axis.text = element_text(size = 11),
+        legend.position = "bottom",
+        legend.text = element_text(size = 11)) +
+  labs(x = "", y = "Percent of Students", fill = "",
+       title = "School Demographics by Performance Status in Math")
+
+# plot reading
+bind_rows(grp_all, grp_read) %>% 
+  mutate(group = fct_relevel(group, "All students", "High performing",
+                             "Low performing", "Other")) %>% 
+  mutate(value = value * 100) %>% 
+  ggplot(aes(name, value, fill = group)) +
+  geom_col(position = position_dodge(.85), width = .8) +
+  geom_text(aes(label = round(value, 1)),
+            position = position_dodge(.85), vjust = -.45) +
+  scale_fill_grey() +
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        axis.title.y = element_text(size = 12),
+        axis.title.x = element_blank(),
+        axis.text = element_text(size = 11),
+        legend.position = "bottom",
+        legend.text = element_text(size = 11)) +
+  labs(x = "", y = "Percent of Students", fill = "",
+       title = "School Demographics by Performance Status in Reading")
