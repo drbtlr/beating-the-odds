@@ -402,3 +402,151 @@ bind_rows(grp_all, grp_read) %>%
         legend.text = element_text(size = 11)) +
   labs(x = "", y = "Percent of Students", fill = "",
        title = "School Demographics by Performance Status in Reading")
+
+
+# step 6: model comparision (optional) -----
+
+# COMPARE 1: calc BTO using OLS
+
+# fit models
+ols_math <- lm(
+  scale_score_11_math ~ 
+    male + race_white + frpl_ever_in_hs + sped_ever_in_hs + 
+    lep_ever_in_hs + gifted_ever_in_hs + scale_score_8_math_center + 
+    sch_male_center + sch_white_center + sch_frpl_center +
+    sch_sped_center + sch_lep_center + sch_gifted_center +
+    sch_8_math_center + flag_2010_cohort + first_hs_code,
+  data = df_center
+)
+
+summary(ols_math)
+
+ols_read <- lm(
+  scale_score_11_read ~ 
+    male + race_white + frpl_ever_in_hs + sped_ever_in_hs + 
+    lep_ever_in_hs + gifted_ever_in_hs + scale_score_8_read_center + 
+    sch_male_center + sch_white_center + sch_frpl_center +
+    sch_sped_center + sch_lep_center + sch_gifted_center +
+    sch_8_read_center + flag_2010_cohort + first_hs_code,
+  data = df_center
+)
+
+summary(ols_read)
+
+# access school-level residuals
+ols_resids_math <- broom::augment(ols_math)
+ols_resids_read <- broom::augment(ols_read)
+
+ols_bto_math <- ols_resids_math %>% 
+  group_by(first_hs_code) %>% 
+  summarise(.resid = mean(.resid)) %>% 
+  mutate(pos_bench = .resid * 1.96,
+         neg_bench = .resid * -1.96,) %>% 
+  mutate(sig = ifelse(.resid >= pos_bench | .resid <= neg_bench, "yes", "no")) %>% 
+  select(first_hs_code, resid_math=.resid, bto_math=sig)
+
+ols_bto_read <- ols_resids_read %>% 
+  group_by(first_hs_code) %>% 
+  summarise(.resid = mean(.resid)) %>% 
+  mutate(pos_bench = .resid * 1.96,
+         neg_bench = .resid * -1.96,) %>% 
+  mutate(sig = ifelse(.resid >= pos_bench | .resid <= neg_bench, "yes", "no")) %>% 
+  select(first_hs_code, resid_read=.resid, bto_read=sig)
+
+# merge bto datasets
+ols_bto_read_math <- left_join(ols_bto_read, ols_bto_math, by = "first_hs_code") %>% 
+  # conver to numeric for merge
+  mutate(first_hs_code = as.numeric(first_hs_code))
+
+# pull school and district info from original dataset
+df_names <- faketucky %>% 
+  select(first_dist_code, first_hs_code, first_dist_name, first_hs_name) %>% 
+  distinct()
+
+# merge bto + school info datasets
+df_ols_bto <- left_join(df_names, ols_bto_read_math, by = "first_hs_code") %>% 
+  rename(ols_bto_read = bto_read, ols_bto_math = bto_math)
+
+# compare OLS model to HLM model
+df_compare <- left_join(df_bto %>% select(first_hs_code, bto_read, bto_math),
+                        df_ols_bto %>% select(first_hs_code, ols_bto_math, ols_bto_read))
+
+# calc agreement rate
+# NOTE: using BTO +/- -> consider split analysis
+
+df_compare %>% 
+  mutate(same_math = ifelse(bto_math == "yes" & ols_bto_math == "yes", "yes", "no"),
+         same_read = ifelse(bto_read == "yes" & ols_bto_read == "yes", "yes", "no")) %>% 
+  pivot_longer(-first_hs_code) %>% 
+  group_by(name) %>% 
+  count(value) %>% 
+  filter(value == "yes") %>% 
+  select(-value) %>% 
+  pivot_wider(names_from = name, 
+              values_from = n) %>% 
+  mutate(agree_math = same_math/(bto_math + ols_bto_math / 2),
+         agree_read = same_read/(bto_read + ols_bto_read / 2)) # low!
+
+# COMPARE 2: calc HLM for 2009 and 2010
+
+# fit models
+math_2009 <- lmer(
+  scale_score_11_math ~ 
+    male + race_white + frpl_ever_in_hs + sped_ever_in_hs + 
+    lep_ever_in_hs + gifted_ever_in_hs + scale_score_8_math_center + 
+    sch_male_center + sch_white_center + sch_frpl_center +
+    sch_sped_center + sch_lep_center + sch_gifted_center +
+    sch_8_math_center + (1|first_hs_code),
+  data = df_center %>% filter(flag_2010_cohort==0), REML = TRUE
+)
+
+summary(math_2009)
+
+math_2010 <- lmer(
+  scale_score_11_math ~ 
+    male + race_white + frpl_ever_in_hs + sped_ever_in_hs + 
+    lep_ever_in_hs + gifted_ever_in_hs + scale_score_8_math_center + 
+    sch_male_center + sch_white_center + sch_frpl_center +
+    sch_sped_center + sch_lep_center + sch_gifted_center +
+    sch_8_math_center + (1|first_hs_code),
+  data = df_center %>% filter(flag_2010_cohort==1), REML = TRUE
+)
+
+summary(math_2010)
+
+# access school-level residuals
+resids_math_2009 <- ranef(math_2009)
+resids_math_2010 <- ranef(math_2010)
+
+# execute function for each subject area
+bto_math_2009 <- calc_bto(resids_math_2009) %>% 
+  select(first_hs_code=grp, resid_math_2009=condval, bto_math_2009=sig)
+
+bto_math_2010 <- calc_bto(resids_math_2010) %>% 
+  select(first_hs_code=grp, resid_math_2010=condval, bto_math_2010=sig)
+
+# merge bto datasets
+bto_math_0910 <- left_join(bto_math_2009, bto_math_2010, by = "first_hs_code") %>% 
+  # conver to numeric for merge
+  mutate(first_hs_code = as.numeric(first_hs_code))
+
+# pull school and district info from original dataset
+df_names <- faketucky %>% 
+  select(first_dist_code, first_hs_code, first_dist_name, first_hs_name) %>% 
+  distinct()
+
+# merge bto + school info datasets
+df_bto_math_0910 <- left_join(df_names, bto_math_0910, by = "first_hs_code") %>% 
+  select(first_hs_code, contains("bto"))
+
+# calc agreement rate
+df_bto_math_0910 %>% 
+  mutate(same_math = ifelse(bto_math_2009 == "yes" & bto_math_2010 == "yes", "yes", "no")) %>% 
+  pivot_longer(-first_hs_code) %>% 
+  group_by(name) %>% 
+  count(value) %>% 
+  filter(value == "yes") %>% 
+  select(-value) %>% 
+  pivot_wider(names_from = name, 
+              values_from = n) %>% 
+  mutate(agree_math = same_math/(bto_math_2009 + bto_math_2010 / 2)) # again, low!
