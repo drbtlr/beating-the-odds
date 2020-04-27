@@ -88,7 +88,10 @@ Below is a list of variables and descriptions used in the analyses:
 
 | Variable Name        | Variable Description                                                 |
 |:-----------          |:------------------                                                   |
+| `first_dist_code`    | Code of first district attended in high school                       |
+| `first_dist_name`    | Name of first district attended in high school                       |
 | `first_hs_code`      | Code of first high school attended                                   |
+| `first_hs_name`      | Name of first high school attended                                   |
 | `chrt_ninth`         | Student 9th grade cohort                                             |
 | `male`               | Student male indicator                                               |
 | `race_ethnicity`     | Student race/ethnicity                                               |
@@ -108,10 +111,10 @@ Below is a list of variables and descriptions used in the analyses:
 load("../data/faketucky.rda")
 
 # Select variables of interest
-my_vars <- c("first_hs_code", "chrt_ninth", "male", "race_ethnicity", "frpl_ever_in_hs", 
-             "sped_ever_in_hs", "lep_ever_in_hs", "lep_ever_in_hs", "gifted_ever_in_hs", 
-             "scale_score_8_math", "scale_score_8_read", 
-             "scale_score_11_math", "scale_score_11_read")
+my_vars <- c("first_dist_code", "first_dist_name", "first_hs_code", "first_hs_name", 
+             "chrt_ninth", "male", "race_ethnicity", "frpl_ever_in_hs", "sped_ever_in_hs", 
+             "lep_ever_in_hs", "lep_ever_in_hs", "gifted_ever_in_hs", "scale_score_8_math",
+             "scale_score_8_read", "scale_score_11_math", "scale_score_11_read")
 
 faketucky <- faketucky_20160923 %>% 
   select(all_of(my_vars))
@@ -124,49 +127,3 @@ glimpse(faketucky)
  
 This guide is an open-source document hosted on Github and generated using R Markdown. We welcome feedback, corrections, additions, and updates. Please visit the OpenSDP [participate repository](https://opensdp.github.io/participate/) to read our contributor guidelines.
 
-## Analyses
-
-### Exploratory Analysis
-
-**The following is an example of what the beginning structure of an analysis component may look like**
-
-**Purpose:** Descriptive statistics give your agency a quick snapshot of current achievement gaps among students, identifying areas for further investigation and analysis.
-
-**Required Analysis File Variables:**
-
-- `grade_level` 
-- `male`        
-- `race_ethnicity` 
-- `eco_dis`      
-- `lep`
-- `iep`
-- `rdg_ss`
-- `math_ss`
-
-**Ask Yourself**
-
-- How do different study subpopulations in your organization perform on standardized tests? How do they compare?
-- Why do these differences occur?
-- What differences do you want to explore further?
-
-**Analytic Technique:** Calculate the summary statistics for exam performance, for all 5th and 8th grade exam takers. Summary statistics provide us with broad points of comparison before we start breaking down the data by student population.
-
-```{r Averages, echo=TRUE}
-# // Step 1: Set which tested grade levels to analyze (5th and 8th here)
-grades <- c("5","8")
-
-# // Step 2: Set which tested subjects to analyze (math and reading here)
-subjects <- c("rdg_ss","math_ss")
-
-# // Step 3: Calculate summary stats for each grade level
-# Loop over grade level
-for(grade in grades){
-  
-  data = df[df$grade_level == grade,] #Isolates grade level
-  print(paste("grade level: ",grade))
-  a <- summary(data[,subjects]) #Summary stats table for grade
-  print(a) #Print summary table
-  
-} #End loop over grade level
-
-```
