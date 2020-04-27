@@ -127,3 +127,119 @@ glimpse(faketucky)
  
 This guide is an open-source document hosted on Github and generated using R Markdown. We welcome feedback, corrections, additions, and updates. Please visit the OpenSDP [participate repository](https://opensdp.github.io/participate/) to read our contributor guidelines.
 
+## Analyses
+
+### Identify BTO Schools
+
+**Purpose:** *Add purpose here.*
+
+**Required Analysis File Variables:**
+
+- *Add variables here.*
+
+**Ask Yourself**
+
+- *Add question here.*
+- *Add question here.*
+- *Add question here.*
+
+**Analytic Technique:** *Add description here.*
+
+#### Step 1: Prepare data for analysis
+
+*Add details here.*
+
+```{r prep-data, echo=TRUE}
+# // Step 1: 
+
+# // Step 2: 
+
+```
+
+#### Step 2: Fit multilevel models
+
+*Add details here.*
+
+```{r fit-models, echo=TRUE}
+# // Step 1: 
+
+# // Step 2: 
+
+```
+
+#### Step 3: Calculate statistics for beathing-the-odds scools
+
+*Add details here.*
+
+```{r calc-bto, echo=TRUE}
+# // Step 1: 
+
+# // Step 2: 
+
+```
+
+#### Step 4: Plot beathing-the-odds scools
+
+*Add details here.*
+
+```{r plot-bto, echo=TRUE}
+# // Step 1: 
+
+# // Step 2: 
+
+```
+
+### BTO schools by performance
+
+**Purpose:** *Add purpose here.*
+
+**Required Analysis File Variables:**
+
+- *Add variables here.*
+
+**Ask Yourself**
+
+- *Add question here.*
+- *Add question here.*
+- *Add question here.*
+
+**Analytic Technique:** *Add description here.*
+
+```{r bto-cuts, echo=TRUE}
+# // Step 1: 
+
+# // Step 2: 
+
+```
+
+### BTO schools by student demographics
+
+**Purpose:** *Add purpose here.*
+
+**Required Analysis File Variables:**
+
+- *Add variables here.*
+
+**Ask Yourself**
+
+- *Add question here.*
+- *Add question here.*
+- *Add question here.*
+
+**Analytic Technique:** *Add description here.*
+
+```{r bto-demos, echo=TRUE}
+# // Step 1: 
+
+# // Step 2: 
+
+```
+
+## Resources
+
+Below are a few helpful resources on conducting a beating-the-odds analysis.
+
+- *Add resource here.*
+- *Add resource here.*
+- *Add resource here.*
+- *Add resource here.*
