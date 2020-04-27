@@ -86,20 +86,20 @@ This guide uses SDP's ["Faketucky"](https://github.com/opensdp/faketucky) datase
 
 Below is a list of variables and descriptions used in the analyses:
 
-**UPDATE TABLE**
-
-| Variable Name    | Variable Description                                 |
-|:-----------      |:------------------                                   |
-| `grade_level`    | Grade level of exam student took (3-8)               |
-| `school_code`    | School ID number                                     |
-| `sid`            | Student ID number                                    | 
-| `male`           | Student gender                                       |
-| `race_ethnicity` | Student race/ethnicity                               |
-| `eco_dis`        | Student level of economic disadvantage               |
-| `lep`            | Level of Limited English Proficiency                 |
-| `iep`            | Indicator if student enrolled in special education   |
-| `rdg_ss`         | Scale score for reading exam                         |
-| `math_ss`        | Scale score for math exam                            |
+| Variable Name        | Variable Description                                                 |
+|:-----------          |:------------------                                                   |
+| `first_hs_code`      | Code of first high school attended                                   |
+| `chrt_ninth`         | Student 9th grade cohort                                             |
+| `male`               | Student male indicator                                               |
+| `race_ethnicity`     | Student race/ethnicity                                               |
+| `frpl_ever_in_hs`    | Student ever received free or reduced price lunch in high school     |
+| `sped_ever_in_hs`    | Student ever classified as special ed in high school                 |
+| `lep_ever_in_hs`     | Student ever classified as limited English proficiency in high school|
+| `gifted_ever_in_hs`  | Student ever classified as gifted in high school                     |
+| `scale_score_8_math` | Scaled score of 8th grade math test                                  |
+| `scale_score_8_read` | Scaled score of 8th grade reading test                               |
+| `scale_score_11_math`| Scaled score of highest math ACT                                     |
+| `scale_score_11_read`| Scaled score of highest reading ACT                                  |
 
 #### Loading the Dataset
 
@@ -108,9 +108,13 @@ Below is a list of variables and descriptions used in the analyses:
 load("../data/faketucky.rda")
 
 # Select variables of interest
+my_vars <- c("first_hs_code", "chrt_ninth", "male", "race_ethnicity", "frpl_ever_in_hs", 
+             "sped_ever_in_hs", "lep_ever_in_hs", "lep_ever_in_hs", "gifted_ever_in_hs", 
+             "scale_score_8_math", "scale_score_8_read", 
+             "scale_score_11_math", "scale_score_11_read")
+
 faketucky <- faketucky_20160923 %>% 
-  select(-starts_with("enroll"), 
-         -starts_with("ihe"))
+  select(my_vars)
 
 # Check out the data
 glimpse(faketucky)
