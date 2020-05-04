@@ -111,9 +111,10 @@ Below is a list of variables and descriptions used in the analyses:
 load("../data/faketucky.rda")
 
 # Select variables of interest
-my_vars <- c("first_dist_code", "first_dist_name", "first_hs_code", "first_hs_name", 
-             "chrt_ninth", "male", "race_ethnicity", "frpl_ever_in_hs", "sped_ever_in_hs", 
-             "lep_ever_in_hs", "lep_ever_in_hs", "gifted_ever_in_hs", "scale_score_8_math",
+my_vars <- c("first_dist_code", "first_dist_name", "first_hs_code", 
+             "first_hs_name", "chrt_ninth", "male", "race_ethnicity", 
+             "frpl_ever_in_hs", "sped_ever_in_hs", "lep_ever_in_hs", 
+             "lep_ever_in_hs", "gifted_ever_in_hs", "scale_score_8_math",
              "scale_score_8_read", "scale_score_11_math", "scale_score_11_read")
 
 faketucky <- faketucky_20160923 %>% 
@@ -187,8 +188,11 @@ df_center <- df_sch_avg %>%
   # Group by cohort year
   group_by(chrt_ninth) %>% 
   # Center student-level variables
-  mutate(scale_score_8_math_center = scale_score_8_math - mean(scale_score_8_math, na.rm = TRUE),
-         scale_score_8_read_center = scale_score_8_read - mean(scale_score_8_read, na.rm = TRUE)) %>% 
+  mutate(
+    scale_score_8_math_center = scale_score_8_math - mean(scale_score_8_math, 
+                                                          na.rm = TRUE),
+    scale_score_8_read_center = scale_score_8_read - mean(scale_score_8_read, 
+                                                          na.rm = TRUE)) %>% 
   # Calculate within year mean for school-level variables
   mutate(sch_male_mean_year = mean(sch_male, na.rm = TRUE),
          sch_white_mean_year = mean(sch_white, na.rm = TRUE),
@@ -238,9 +242,9 @@ m_read <- lmer(
 )
 
 # // Step 2.2: Inspecit summary statistics for model fit
-# Examine the coefficients and standard errors for each variable. Ask yourself if
-# the estimates are in the range of reasonable possiblity. If not, go back and 
-# inspect your dataset and make sure there are no errors in how you processed 
+# Examine the coefficients and standard errors for each variable. Ask yourself 
+# if the estimates are in the range of reasonable possiblity. If not, go back 
+# and inspect your dataset and make sure there are no errors in data processing 
 # the data. Also inspect your dataset to make sure that the assumptions of 
 # multilevel modeling hold. 
 summary(m_math)
@@ -266,12 +270,15 @@ calc_bto <- function(.resids) {
     mutate(pos_bench = condsd * 1.96,
            neg_bench = condsd * -1.96,) %>% 
     # Flag schools that perferm above/below benchmark (i.e., BTOs)
-    mutate(sig = ifelse(condval >= pos_bench | condval <= neg_bench, "yes", "no"))
+    mutate(sig = ifelse(condval >= pos_bench | 
+                          condval <= neg_bench, 
+                        "yes", "no"))
 }
 
 # // Step 3.3: Execute function for each subject area
 bto_math <- calc_bto(resids_math) %>% 
-  # Keep variables of interest. Note we select and rename variables at the same time.
+  # Keep variables of interest. 
+  # Note: we select and rename variables at the same time.
   select(first_hs_code = grp, resid_math = condval, bto_math = sig)
   
 bto_read <- calc_bto(resids_read) %>% 
@@ -300,7 +307,8 @@ df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
 ```{r plot-bto, echo=TRUE}
 # Create scatter plot math/read residuals
 df_bto %>% 
-  mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes", "BTO School", "Not a BTO School")) %>% 
+  mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes", 
+                           "BTO School", "Not a BTO School")) %>% 
   filter(!is.na(bto_both)) %>% 
   ggplot(aes(resid_math, resid_read, color = bto_both)) +
   geom_point(size = 2, alpha = .6) +
@@ -407,10 +415,12 @@ bind_rows(df_math, df_read) %>%
     cut == 2 ~ "Medium\npositive\nincrease",
     cut == 3 ~ "Large\npositive\nincrease"
   )) %>% 
-  mutate(cut = fct_relevel(cut, "Large\nnegative\ndecrease", 
-                           "Medium\nnegative\ndecrease", "Small\nnegative\ndecrease", 
-                           "No\nsignificant\ndecrease", "Small\npositive\nincrease", 
-                           "Medium\npositive\nincrease", "Large\npositive\nincrease")) %>% 
+  mutate(cut = fct_relevel(
+    cut, 
+    "Large\nnegative\ndecrease", "Medium\nnegative\ndecrease", 
+    "Small\nnegative\ndecrease", "No\nsignificant\ndecrease", 
+    "Small\npositive\nincrease", "Medium\npositive\nincrease", 
+    "Large\npositive\nincrease")) %>% 
   filter(!is.na(cut)) %>% 
   ggplot(aes(cut, n, fill = subject)) +
   geom_col(position = position_dodge(.85), width = .8) +
