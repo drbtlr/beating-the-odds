@@ -82,7 +82,7 @@ source("../R/functions.R")
 
 ### About the Data
 
-This guide uses SDP's ["Faketucky"](https://github.com/opensdp/faketucky) dataset. The Faketucky synthetic college-going analysis file contains high school and college outcome data for two graduating cohorts of approximately 40,000 students. There are no real children in the dataset, but it mirrors the relationships between variables present in real data. The dataset was developed as an offshoot of SDP's [college-going diagnostic for Kentucky](https://cepr.harvard.edu/publications/sdp-college-going-diagnostic-kentucky), using the R [synthpop](https://cran.r-project.org/web/packages/synthpop/index.html) package.
+This guide uses SDP's ["Faketucky"](https://github.com/opensdp/faketucky) dataset. The Faketucky synthetic college-going analysis file contains high school and college outcome data for two graduating cohorts of approximately 40,000 students. There are no real children in the dataset, but it mirrors the relationships between variables present in real data. The dataset was developed as an offshoot of SDP's [college-going diagnostic for Kentucky](https://cepr.harvard.edu/publications/sdp-college-going-diagnostic-kentucky), using the R [synthpop](https://cran.r-project.org/web/packages/synthpop/index.html) package. In addition, we created school-level aggregates for each variables. The first step of the analysis "Prepare data for analysis" describes the steps to create the school-level variables.
 
 Below is a list of variables and descriptions used in the analyses:
 
@@ -118,9 +118,6 @@ my_vars <- c("first_dist_code", "first_dist_name", "first_hs_code", "first_hs_na
 
 faketucky <- faketucky_20160923 %>% 
   select(all_of(my_vars))
-
-# Check out the data
-glimpse(faketucky)
 ```
 
 ### Giving Feedback on this Guide
@@ -162,13 +159,56 @@ We listed a few helpful resources on multilevel modeling at the end of this guid
 
 #### Step 1: Prepare data for analysis
 
-*Add details here.*
+This beathing-the-odds analysis uses a multilevel framework that incoroporates school-level information into the modeling process. To prepare the analytical dataset, we calculated school averages within each school year. These variables when then centered using the grand mean of each variable. 
 
 ```{r prep-data, echo=TRUE}
-# // Step 1: 
+# // Step 1.1: Create school averages within year
+df_sch_avg <- faketucky %>% 
+  # Create indicator for students identifying as white
+  mutate(race_white = ifelse(race_ethnicity == "White", 1, 0)) %>% 
+  # Group data by high school and cohort year
+  group_by(first_hs_code, chrt_ninth) %>% 
+  # Calculate school averages within year
+  mutate(sch_male = mean(male, na.rm = TRUE),
+         sch_white = mean(race_white, na.rm = TRUE),
+         sch_frpl = mean(frpl_ever_in_hs, na.rm = TRUE),
+         sch_sped = mean(sped_ever_in_hs, na.rm = TRUE),
+         sch_lep = mean(lep_ever_in_hs, na.rm = TRUE),
+         sch_gifted = mean(gifted_ever_in_hs, na.rm = TRUE),
+         sch_8_math = mean(scale_score_8_math, na.rm = TRUE),
+         sch_8_read = mean(scale_score_8_read, na.rm = TRUE)) %>% 
+  # Remember to ungroup
+  ungroup()
 
-# // Step 2: 
-
+# // Step 1.2: Center variables around grand mean within year
+df_center <- df_sch_avg %>% 
+  # Flag 2010 cohort
+  mutate(flag_2010_cohort = ifelse(chrt_ninth == 2010, 1, 0)) %>% 
+  # Group by cohort year
+  group_by(chrt_ninth) %>% 
+  # Center student-level variables
+  mutate(scale_score_8_math_center = scale_score_8_math - mean(scale_score_8_math, na.rm = TRUE),
+         scale_score_8_read_center = scale_score_8_read - mean(scale_score_8_read, na.rm = TRUE)) %>% 
+  # Calculate within year mean for school-level variables
+  mutate(sch_male_mean_year = mean(sch_male, na.rm = TRUE),
+         sch_white_mean_year = mean(sch_white, na.rm = TRUE),
+         sch_frpl_mean_year = mean(sch_frpl, na.rm = TRUE),
+         sch_sped_mean_year = mean(sch_sped, na.rm = TRUE),
+         sch_lep_mean_year = mean(sch_lep, na.rm = TRUE),
+         sch_gifted_mean_year = mean(sch_gifted, na.rm = TRUE),
+         sch_8_math_mean_year = mean(sch_8_math, na.rm = TRUE),
+         sch_8_read_mean_year = mean(sch_8_read, na.rm = TRUE)) %>% 
+  # Ungroup
+  ungroup() %>% 
+  # Center school-level variables
+  mutate(sch_male_center = sch_male - sch_male_mean_year,
+         sch_white_center = sch_white - sch_white_mean_year,
+         sch_frpl_center = sch_frpl - sch_frpl_mean_year,
+         sch_sped_center = sch_sped - sch_sped_mean_year,
+         sch_lep_center = sch_lep - sch_lep_mean_year,
+         sch_gifted_center = sch_gifted - sch_gifted_mean_year,
+         sch_8_math_center = sch_8_math - sch_8_math_mean_year,
+         sch_8_read_center = sch_8_read - sch_8_read_mean_year)
 ```
 
 #### Step 2: Fit multilevel models
