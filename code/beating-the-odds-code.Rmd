@@ -298,10 +298,27 @@ df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
 *Add details here.*
 
 ```{r plot-bto, echo=TRUE}
-# // Step 1: 
-
-# // Step 2: 
-
+# Create scatter plot math/read residuals
+df_bto %>% 
+  mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes", "BTO School", "Not a BTO School")) %>% 
+  filter(!is.na(bto_both)) %>% 
+  ggplot(aes(resid_math, resid_read, color = bto_both)) +
+  geom_point(size = 2, alpha = .6) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  scale_color_manual(values = c("#D55E00", "#999999")) +
+  theme_bw() +
+  theme(plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 11),
+        legend.position = "bottom",
+        legend.text = element_text(size = 11)) +
+  labs(x = "Math",
+       y = "Reading",
+       color = "",
+       title = "BTO Schools in Math and Reading",
+       subtitle = "Two-year status model (actual - predicted), 2010")
 ```
 
 ### BTO schools by performance
