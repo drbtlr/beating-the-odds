@@ -216,10 +216,39 @@ df_center <- df_sch_avg %>%
 *Add details here.*
 
 ```{r fit-models, echo=TRUE}
-# // Step 1: 
+# // Step 2.1: Fit multilevel models for each subject area  
 
-# // Step 2: 
+# Math model
+m_math <- lmer(
+  scale_score_11_math ~ 
+    male + race_white + frpl_ever_in_hs + sped_ever_in_hs + 
+    lep_ever_in_hs + gifted_ever_in_hs + scale_score_8_math_center + 
+    sch_male_center + sch_white_center + sch_frpl_center +
+    sch_sped_center + sch_lep_center + sch_gifted_center +
+    sch_8_math_center + flag_2010_cohort + (1|first_hs_code),
+  data = df_center, REML = TRUE
+)
 
+# Reading model
+m_read <- lmer(
+  scale_score_11_read ~ 
+    male + race_white + frpl_ever_in_hs + sped_ever_in_hs + 
+    lep_ever_in_hs + gifted_ever_in_hs + scale_score_8_read_center + 
+    sch_male_center + sch_white_center + sch_frpl_center +
+    sch_sped_center + sch_lep_center + sch_gifted_center +
+    sch_8_read_center + flag_2010_cohort + (1|first_hs_code),
+  data = df_center, REML = TRUE
+)
+
+# // Step 2.2: Inspecit summary statistics for model fit
+
+# Examine the coefficients and standard errors for each variable. Ask yourself if
+# the estimates are in the range of reasonable possiblity. If not, go back and 
+# inspect your dataset and make sure there are no errors in how you processed 
+# the data. Also inspect your dataset to make sure that the assumptions of 
+# multilevel modeling hold. 
+summary(m_math)
+summary(m_read)
 ```
 
 #### Step 3: Calculate statistics for beathing-the-odds scools
