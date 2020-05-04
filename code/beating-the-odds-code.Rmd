@@ -511,10 +511,110 @@ df_cuts %>%
 **Analytic Technique:** *Add description here.*
 
 ```{r bto-demos, echo=TRUE}
-# // Step 1: 
+# // Step 1: Create temp datasets for plotting
+grp_all <- df_sch_avg %>% 
+  filter(chrt_ninth == 2010) %>% 
+  summarise(prop_white = mean(sch_white, na.rm = TRUE),
+            prop_frpl = mean(sch_frpl, na.rm = TRUE),
+            prop_sped = mean(sch_sped, na.rm = TRUE),
+            prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
+  mutate(group = "All students") %>% 
+  pivot_longer(-group)
 
-# // Step 2: 
+grp_math <- df_cuts %>%
+  mutate(perf_math_high_low = case_when(
+    perf_math > 0 ~ "High performing",
+    perf_math < 0 ~ "Low performing",
+    perf_math == 0 ~ "Other"
+  )) %>%
+  left_join(df_sch_avg %>% filter(chrt_ninth == 2010)) %>% 
+  drop_na(perf_math_high_low) %>% 
+  group_by(perf_math_high_low) %>% 
+  summarise(prop_white = mean(sch_white, na.rm = TRUE),
+            prop_frpl = mean(sch_frpl, na.rm = TRUE),
+            prop_sped = mean(sch_sped, na.rm = TRUE),
+            prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
+  pivot_longer(cols = starts_with("prop")) %>% 
+  rename(group = perf_math_high_low)
 
+grp_read <- df_cuts %>%
+  mutate(perf_read_high_low = case_when(
+    perf_read > 0 ~ "High performing",
+    perf_read < 0 ~ "Low performing",
+    perf_read == 0 ~ "Other"
+  )) %>%
+  left_join(df_sch_avg %>% filter(chrt_ninth == 2010)) %>% 
+  drop_na(perf_read_high_low) %>% 
+  group_by(perf_read_high_low) %>% 
+  summarise(prop_white = mean(sch_white, na.rm = TRUE),
+            prop_frpl = mean(sch_frpl, na.rm = TRUE),
+            prop_sped = mean(sch_sped, na.rm = TRUE),
+            prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
+  pivot_longer(cols = starts_with("prop")) %>% 
+  rename(group = perf_read_high_low) 
+
+# // Step 2: Plot
+
+# Math
+bind_rows(grp_all, grp_math) %>% 
+  # Recode variables for plotting
+  mutate(group = fct_relevel(
+    group, "All students", "High performing","Low performing", "Other"
+    )) %>% 
+  mutate(value = round(value * 100), 1) %>% 
+  mutate(name = case_when(
+    name == "prop_white" ~ "White",
+    name == "prop_frpl" ~ "Low Income",
+    name == "prop_sped" ~ "Special Education",
+    name == "prop_lep" ~ "Limited English"
+  )) %>% 
+  ggplot(aes(name, value, fill = group)) +
+  geom_col(position = position_dodge(.85), width = .8) +
+  geom_text(aes(label = round(value, 1)),
+            position = position_dodge(.85), vjust = -.45) +
+  scale_fill_manual(values = c("#999999", "#E69F00", "#56B4E9", "#009E73")) +
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 12),
+        axis.text = element_text(size = 11),
+        legend.position = "top",
+        legend.text = element_text(size = 11)) +
+  labs(x = "", y = "Percent of Students", fill = "",
+       title = "School Demographics by Performance Status in Math")
+
+# Reading
+bind_rows(grp_all, grp_read) %>% 
+  mutate(group = fct_relevel(
+    group, "All students", "High performing","Low performing", "Other"
+  )) %>% 
+  mutate(value = round(value * 100), 1) %>% 
+  mutate(name = case_when(
+    name == "prop_white" ~ "White",
+    name == "prop_frpl" ~ "Low Income",
+    name == "prop_sped" ~ "Special Education",
+    name == "prop_lep" ~ "Limited English"
+  )) %>% 
+  ggplot(aes(name, value, fill = group)) +
+  geom_col(position = position_dodge(.85), width = .8) +
+  geom_text(aes(label = round(value, 1)),
+            position = position_dodge(.85), vjust = -.45) +
+  scale_fill_manual(values = c("#999999", "#E69F00", "#56B4E9", "#009E73")) +
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 12),
+        axis.text = element_text(size = 11),
+        legend.position = "top",
+        legend.text = element_text(size = 11)) +
+  labs(x = "", y = "Percent of Students", fill = "",
+       title = "School Demographics by Performance Status in Reading")
 ```
 
 ## Resources
