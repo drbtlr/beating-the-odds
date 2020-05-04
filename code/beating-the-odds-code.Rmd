@@ -337,7 +337,7 @@ df_bto %>%
 
 **Analytic Technique:** *Add description here.*
 
-```{r bto-cuts, echo=TRUE}
+```{r bto-cuts-plot, echo=TRUE}
 # // Step 1: Determine performance levels
 # We examined the distribution of BTO schools as one example
 # of how to determine performance levels. We recognize that 
@@ -429,6 +429,59 @@ bind_rows(df_math, df_read) %>%
         legend.text = element_text(size = 11)) +
   labs(x = "", y = "Number of Schools", fill = "",
        title = "Distribution of BTO Schools in Math and Reading") 
+```
+
+**Add text here.**
+
+```{r bto-cuts-table, echo=TRUE}
+# Plot table
+df_cuts %>%
+  # Recode variable for plotting
+  mutate(perf_math = case_when(
+    perf_math == -3 ~ "Large\nnegative\ndecrease",
+    perf_math == -2 ~ "Medium\nnegative\ndecrease",
+    perf_math == -1 ~ "Small\nnegative\ndecrease",
+    perf_math == 0 ~ "No\nsignificant\ndecrease",
+    perf_math == 1 ~ "Small\npositive\nincrease",
+    perf_math == 2 ~ "Medium\npositive\nincrease",
+    perf_math == 3 ~ "Large\npositive\nincrease"
+  )) %>% 
+  mutate(perf_math = fct_relevel(
+    perf_math, 
+    "Large\nnegative\ndecrease", "Medium\nnegative\ndecrease", 
+    "Small\nnegative\ndecrease", "No\nsignificant\ndecrease", 
+    "Small\npositive\nincrease", "Medium\npositive\nincrease", 
+    "Large\npositive\nincrease")) %>%
+  mutate(perf_read = case_when(
+    perf_read == -3 ~ "Large\nnegative\ndecrease",
+    perf_read == -2 ~ "Medium\nnegative\ndecrease",
+    perf_read == -1 ~ "Small\nnegative\ndecrease",
+    perf_read == 0 ~ "No\nsignificant\ndecrease",
+    perf_read == 1 ~ "Small\npositive\nincrease",
+    perf_read == 2 ~ "Medium\npositive\nincrease",
+    perf_read == 3 ~ "Large\npositive\nincrease"
+  )) %>% 
+  mutate(perf_read = fct_relevel(
+    perf_read, 
+    "Large\nnegative\ndecrease", "Medium\nnegative\ndecrease", 
+    "Small\nnegative\ndecrease", "No\nsignificant\ndecrease", 
+    "Small\npositive\nincrease", "Medium\npositive\nincrease", 
+    "Large\npositive\nincrease")) %>%
+  # Drop missing values for plotting
+  drop_na(perf_math, perf_read) %>%
+  # Count number of schools by performance levels
+  count(perf_math, perf_read) %>%
+  ggplot(aes(perf_math, perf_read)) +
+  geom_tile(fill = "white") +
+  geom_text(aes(label = n)) +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 11)) +
+  labs(x = "Math Performance", y = "Reading Performance",
+       title = "School Counts by Performance Categories for Math and Reading")
 ```
 
 ### BTO schools by student demographics
