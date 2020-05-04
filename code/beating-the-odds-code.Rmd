@@ -106,7 +106,7 @@ Below is a list of variables and descriptions used in the analyses:
 
 #### Loading the Dataset
 
-```{r load-data, echo=FALSE}
+```{r load-data, echo=TRUE}
 # Load "Faketucky" data file
 load("../data/faketucky.rda")
 
