@@ -359,46 +359,60 @@ grp_read <- df_cuts %>%
 
 # plot math
 bind_rows(grp_all, grp_math) %>% 
-  mutate(group = fct_relevel(group, "All students", "High performing",
-                             "Low performing", "Other")) %>% 
-  mutate(value = value * 100) %>% 
+  mutate(group = fct_relevel(
+    group, "All students", "High performing","Low performing", "Other"
+    )) %>% 
+  mutate(value = round(value * 100), 1) %>% 
+  mutate(name = case_when(
+    name == "prop_white" ~ "White",
+    name == "prop_frpl" ~ "Low Income",
+    name == "prop_sped" ~ "Special Education",
+    name == "prop_lep" ~ "Limited English"
+  )) %>% 
   ggplot(aes(name, value, fill = group)) +
   geom_col(position = position_dodge(.85), width = .8) +
   geom_text(aes(label = round(value, 1)),
             position = position_dodge(.85), vjust = -.45) +
-  scale_fill_grey() +
+  scale_fill_manual(values = c("#999999", "#E69F00", "#56B4E9", "#009E73")) +
   theme_minimal() +
   theme(panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
         plot.title = element_text(size = 16, face = "bold"),
         plot.subtitle = element_text(size = 14),
-        axis.title.y = element_text(size = 12),
         axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 12),
         axis.text = element_text(size = 11),
-        legend.position = "bottom",
+        legend.position = "top",
         legend.text = element_text(size = 11)) +
   labs(x = "", y = "Percent of Students", fill = "",
        title = "School Demographics by Performance Status in Math")
 
 # plot reading
 bind_rows(grp_all, grp_read) %>% 
-  mutate(group = fct_relevel(group, "All students", "High performing",
-                             "Low performing", "Other")) %>% 
-  mutate(value = value * 100) %>% 
+  mutate(group = fct_relevel(
+    group, "All students", "High performing","Low performing", "Other"
+  )) %>% 
+  mutate(value = round(value * 100), 1) %>% 
+  mutate(name = case_when(
+    name == "prop_white" ~ "White",
+    name == "prop_frpl" ~ "Low Income",
+    name == "prop_sped" ~ "Special Education",
+    name == "prop_lep" ~ "Limited English"
+  )) %>% 
   ggplot(aes(name, value, fill = group)) +
   geom_col(position = position_dodge(.85), width = .8) +
   geom_text(aes(label = round(value, 1)),
             position = position_dodge(.85), vjust = -.45) +
-  scale_fill_grey() +
+  scale_fill_manual(values = c("#999999", "#E69F00", "#56B4E9", "#009E73")) +
   theme_minimal() +
   theme(panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
         plot.title = element_text(size = 16, face = "bold"),
         plot.subtitle = element_text(size = 14),
-        axis.title.y = element_text(size = 12),
         axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 12),
         axis.text = element_text(size = 11),
-        legend.position = "bottom",
+        legend.position = "top",
         legend.text = element_text(size = 11)) +
   labs(x = "", y = "Percent of Students", fill = "",
        title = "School Demographics by Performance Status in Reading")
