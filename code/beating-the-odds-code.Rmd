@@ -217,8 +217,6 @@ df_center <- df_sch_avg %>%
 
 ```{r fit-models, echo=TRUE}
 # // Step 2.1: Fit multilevel models for each subject area  
-
-# Math model
 m_math <- lmer(
   scale_score_11_math ~ 
     male + race_white + frpl_ever_in_hs + sped_ever_in_hs + 
@@ -229,7 +227,6 @@ m_math <- lmer(
   data = df_center, REML = TRUE
 )
 
-# Reading model
 m_read <- lmer(
   scale_score_11_read ~ 
     male + race_white + frpl_ever_in_hs + sped_ever_in_hs + 
@@ -241,7 +238,6 @@ m_read <- lmer(
 )
 
 # // Step 2.2: Inspecit summary statistics for model fit
-
 # Examine the coefficients and standard errors for each variable. Ask yourself if
 # the estimates are in the range of reasonable possiblity. If not, go back and 
 # inspect your dataset and make sure there are no errors in how you processed 
@@ -256,10 +252,45 @@ summary(m_read)
 *Add details here.*
 
 ```{r calc-bto, echo=TRUE}
-# // Step 1: 
+# // Step 3.1: Access school-level residuals
+resids_math <- ranef(m_math)
+resids_read <- ranef(m_read)
 
-# // Step 2: 
+# // Step 3.2: Create function to flag BTO schools 
+calc_bto <- function(.resids) {
+  # Imput model residuals
+  .resids %>%
+    # Store as a dataframe
+    data.frame() %>% 
+    # Set benchmark at +2 standard deviations
+    mutate(pos_bench = condsd * 1.96,
+           neg_bench = condsd * -1.96,) %>% 
+    # Flag schools that perferm above/below benchmark (i.e., BTOs)
+    mutate(sig = ifelse(condval >= pos_bench | condval <= neg_bench, "yes", "no"))
+}
 
+# // Step 3.3: Execute function for each subject area
+bto_math <- calc_bto(resids_math) %>% 
+  # Keep variables of interest. Note we select and rename variables at the same time.
+  select(first_hs_code = grp, resid_math = condval, bto_math = sig)
+  
+bto_read <- calc_bto(resids_read) %>% 
+  select(first_hs_code = grp, resid_read = condval, bto_read = sig)
+
+# // Step 3.4: Merge datsets for plotting
+
+# Merge bto datasets
+bto_read_math <- left_join(bto_read, bto_math, by = "first_hs_code") %>% 
+  # Convert high school work to numeric for merge
+  mutate(first_hs_code = as.numeric(first_hs_code))
+
+# Pull school and district info from original dataset
+df_names <- faketucky %>% 
+  select(first_dist_code, first_hs_code, first_dist_name, first_hs_name) %>% 
+  distinct()
+
+# Merge bto and school info datasets
+df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code") 
 ```
 
 #### Step 4: Plot beathing-the-odds scools
