@@ -159,7 +159,7 @@ We listed a few helpful resources on multilevel modeling at the end of this guid
 
 #### Step 1: Prepare data for analysis
 
-This beathing-the-odds analysis uses a multilevel framework that incoroporates school-level information into the modeling process. To prepare the analytical dataset, we calculated school averages within each school year. These variables when then centered using the grand mean of each variable. 
+This beathing-the-odds analysis uses a multilevel framework that incoroporates school-level information into the modeling process. To prepare the analytical dataset, we calculated school averages within each school year. These variables where then centered using the grand mean of each variable. 
 
 ```{r prep-data, echo=TRUE}
 # // Step 1.1: Create school averages within year
@@ -338,10 +338,97 @@ df_bto %>%
 **Analytic Technique:** *Add description here.*
 
 ```{r bto-cuts, echo=TRUE}
-# // Step 1: 
+# // Step 1: Determine performance levels
+# We examined the distribution of BTO schools as one example
+# of how to determine performance levels. We recognize that 
+# are a number of other ways to establish performance levels.
+# Example include, referecing academic literature, technical
+# documents, pilot studies, statistical analyses, etc.
+df_bto %>% 
+  mutate(bto_math = ifelse(bto_math == "yes", "Yes", "No")) %>%
+  ggplot(aes(resid_math)) +
+  geom_histogram(aes(fill = bto_math), alpha = .8) +
+  scale_fill_manual(values = c("#D55E00", "#999999")) +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 11),
+        legend.position = "top",
+        legend.text = element_text(size = 11)) +
+  labs(x = "Math Residual", y = "Number of Schools", fill = "",
+       title = "Distribution of BTO Schools by Math Residual") 
 
-# // Step 2: 
+# // Step 2: Set performance levels
+df_cuts <- df_bto %>% 
+  # Set performance cuts for math
+  mutate(perf_math = case_when(
+    # No difference
+    bto_math == "no" ~ 0,
+    # Significant positive difference
+    bto_math == "yes" & between(resid_math, 0, .5) ~ 1,
+    bto_math == "yes" & between(resid_math, .5, 1) ~ 2,
+    bto_math == "yes" & resid_math > 1 ~ 3,
+    # Significant negative difference
+    bto_math == "yes" & between(resid_math, -.5, 0) ~ -1,
+    bto_math == "yes" & between(resid_math, -1, -.5) ~ -2,
+    bto_math == "yes" & resid_math < -1 ~ -3
+  )) %>% 
+  # Set performance cuts for reading, repete previous steps
+  mutate(perf_read = case_when(
+    bto_read == "no" ~ 0,
+    bto_read == "yes" & between(resid_read, 0, .5) ~ 1,
+    bto_read == "yes" & between(resid_read, .5, 1) ~ 2,
+    bto_read == "yes" & resid_read > 1 ~ 3,
+    bto_read == "yes" & between(resid_read, -.5, 0) ~ -1,
+    bto_read == "yes" & between(resid_read, -1, -.5) ~ -2,
+    bto_read == "yes" & resid_read < -1 ~ -3
+  ))
 
+# // Step 2: Create temp datasets for plotting
+df_math <- df_cuts %>% 
+  count(perf_math) %>% 
+  mutate(subject = "Math") %>% 
+  select(subject, cut = perf_math, n)
+
+df_read <- df_cuts %>% 
+  count(perf_read) %>% 
+  mutate(subject = "Reading") %>% 
+  select(subject, cut = perf_read, n)
+
+# // Step 3: Plot
+bind_rows(df_math, df_read) %>% 
+  mutate(cut = case_when(
+    cut == -3 ~ "Large\nnegative\ndecrease",
+    cut == -2 ~ "Medium\nnegative\ndecrease",
+    cut == -1 ~ "Small\nnegative\ndecrease",
+    cut == 0 ~ "No\nsignificant\ndecrease",
+    cut == 1 ~ "Small\npositive\nincrease",
+    cut == 2 ~ "Medium\npositive\nincrease",
+    cut == 3 ~ "Large\npositive\nincrease"
+  )) %>% 
+  mutate(cut = fct_relevel(cut, "Large\nnegative\ndecrease", 
+                           "Medium\nnegative\ndecrease", "Small\nnegative\ndecrease", 
+                           "No\nsignificant\ndecrease", "Small\npositive\nincrease", 
+                           "Medium\npositive\nincrease", "Large\npositive\nincrease")) %>% 
+  filter(!is.na(cut)) %>% 
+  ggplot(aes(cut, n, fill = subject)) +
+  geom_col(position = position_dodge(.85), width = .8) +
+  geom_text(aes(label = n),
+            position = position_dodge(.85), vjust = -.45) +
+  scale_fill_manual(values = c("#D55E00", "#999999")) +
+  theme_minimal() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14),
+        axis.title.y = element_text(size = 12),
+        axis.title.x = element_blank(),
+        axis.text = element_text(size = 11),
+        legend.position = "bottom",
+        legend.text = element_text(size = 11)) +
+  labs(x = "", y = "Number of Schools", fill = "",
+       title = "Distribution of BTO Schools in Math and Reading") 
 ```
 
 ### BTO schools by student demographics
