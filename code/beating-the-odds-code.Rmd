@@ -500,19 +500,24 @@ df_cuts %>%
 
 ### BTO schools by student demographics
 
-**Purpose:** *Add purpose here.*
+**Purpose:** This analysis explores the student demographics of schools at different performance levels. 
 
 **Required Analysis File Variables:**
 
-- *Add variables here.*
+- `chrt_ninth`
+- `sch_white`
+- `sch_frpl`
+- `sch_sped`
+- `sch_lep`
+- `resid_math`
+- `resid_read`
 
 **Ask Yourself**
 
-- *Add question here.*
-- *Add question here.*
-- *Add question here.*
+- Do student populations differ for high- and low-performing schools?
+- How do high-/low-performing schools compare to all school?
 
-**Analytic Technique:** *Add description here.*
+**Analytic Technique:** Calculate the percentage of white (or minority) students, low income students, and special education students for schools in each performance level. 
 
 ```{r bto-demos, echo=TRUE}
 # // Step 1: Create temp datasets for plotting
