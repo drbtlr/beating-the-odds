@@ -169,7 +169,7 @@ df_bto %>%
   geom_point(size = 2, alpha = .6) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_hline(yintercept = 0, linetype = "dashed") +
-  scale_color_manual(values = c("#D55E00", "#999999")) +
+  scale_color_manual(values = c("#E69F00", "#999999")) +
   theme_bw() +
   theme(plot.title = element_text(size = 16, face = "bold"),
         plot.subtitle = element_text(size = 14),
@@ -252,7 +252,7 @@ bind_rows(df_math, df_read) %>%
   geom_col(position = position_dodge(.85), width = .8) +
   geom_text(aes(label = n),
             position = position_dodge(.85), vjust = -.45) +
-  scale_fill_manual(values = c("#D55E00", "#999999")) +
+  scale_fill_manual(values = c("#E69F00", "#999999")) +
   theme_minimal() +
   theme(panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
