@@ -331,19 +331,23 @@ df_bto %>%
 
 ### BTO schools by performance
 
-**Purpose:** *Add purpose here.*
+**Purpose:** This analysis examines the distribution of beating-the-odds schools by performance level in math and reading. Results provide an overall summary of a beathing-the-odds analysis.  
 
 **Required Analysis File Variables:**
 
-- *Add variables here.*
+- `resid_math`
+- `resid_read`
+- `bto_math`
+- `bto_read`
 
 **Ask Yourself**
 
-- *Add question here.*
-- *Add question here.*
-- *Add question here.*
+- How many schools are performing better than expected given their student characteristics? How many are performing worse than expected?
+- How does school performance vary by subject area?
 
-**Analytic Technique:** *Add description here.*
+**Possible Next Steps or Action Plans:** Identity which schools are performing at different levels. Develop academic plan for schools at each performance level.
+
+**Analytic Technique:** Count the number of schools by performance level. Plot a matrix to compare school performance across subject areas.  
 
 ```{r bto-cuts-plot, echo=TRUE}
 # // Step 1: Determine performance levels
