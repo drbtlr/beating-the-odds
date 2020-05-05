@@ -320,7 +320,7 @@ df_bto %>%
         plot.subtitle = element_text(size = 14),
         axis.title = element_text(size = 12),
         axis.text = element_text(size = 11),
-        legend.position = "bottom",
+        legend.position = "top",
         legend.text = element_text(size = 11)) +
   labs(x = "Math",
        y = "Reading",
@@ -439,7 +439,7 @@ bind_rows(df_math, df_read) %>%
         axis.title.y = element_text(size = 12),
         axis.title.x = element_blank(),
         axis.text = element_text(size = 11),
-        legend.position = "bottom",
+        legend.position = "top",
         legend.text = element_text(size = 11)) +
   labs(x = "", y = "Number of Schools", fill = "",
        title = "Distribution of BTO Schools in Math and Reading") 
