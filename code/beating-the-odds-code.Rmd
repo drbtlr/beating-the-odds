@@ -311,8 +311,6 @@ df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
 
 #### Step 4: Plot beathing-the-odds scools
 
-*Add details here.*
-
 ```{r plot-bto, echo=TRUE}
 # Create scatter plot math/read residuals
 df_bto %>% 
