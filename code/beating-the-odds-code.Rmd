@@ -260,7 +260,7 @@ We used the model residuals to identify schools that were beating the odds and p
 We constructed a 95 percent confidence interval around each school's residual, using the
 formula: 
 
-95 percent confidence interval = School residual ±1.96 × Residual standard error.
+```95 percent confidence interval = School residual ±1.96 × Residual standard error.```
 
 Confidence intervals allowed us to determination whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero.
 
@@ -310,6 +310,8 @@ df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
 ```
 
 #### Step 4: Plot beathing-the-odds scools
+
+It's always helpful to plot the results of your analysis. We've found a nice scatter plot of beathing-the-odds schools can be an effective visualization for communicating the overall results of the analysis. 
 
 ```{r plot-bto, echo=TRUE}
 # Create scatter plot math/read residuals
