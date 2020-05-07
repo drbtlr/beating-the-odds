@@ -46,7 +46,7 @@ In this guide, you will be able to use statistical models to predict school perf
 
 School leaders often want to identify promising practices that distinguish high-performing schools from their counterparts and facilitate the transfer of some of these practices to struggling schools. A beating the odds analysis is one approach school leaders can take to identify schools that perform better than expected, given the unique student populations they serve.
 
-The purpose of this guide is to present a data-driven approach to identify beating-the-odds schools. We use multilevel models to predict student performance and school-level effects on that performance. Next, we compare each school's predicted performance to its actual performance. The school is identified as beating the odds if its actual performance is higher than predicted by a statistically significant margin. The procedures presented in this guide parellel those used in a collaborative study by the [Kentucky Department of Education](https://education.ky.gov/) and [REL Appalachia](https://ies.ed.gov/ncee/edlabs/regions/appalachia/).
+The purpose of this guide is to present a data-driven approach to identify beating-the-odds schools. We use multilevel models to predict student performance and school-level effects on that performance. Next, we compare each school's predicted performance to its actual performance. The school is identified as beating the odds if its actual performance is higher or lower than predicted by a statistically significant margin. The procedures presented in this guide parellel those used in a collaborative study by the [Kentucky Department of Education](https://education.ky.gov/) and [REL Appalachia](https://ies.ed.gov/ncee/edlabs/regions/appalachia/).
 
 ### Using this Guide
 
@@ -129,7 +129,7 @@ This guide is an open-source document hosted on Github and generated using R Mar
 
 ### Identify BTO Schools
 
-**Purpose:** This analysis illustrates how to identify schools that perform better than expected, given the unique student populations they serve, using a beating-the-odds approach. 
+**Purpose:** This analysis illustrates how to identify schools that perform better or worse than expected, given the unique student populations they serve, using a beating-the-odds approach. 
 
 **Required Analysis File Variables:**
 
