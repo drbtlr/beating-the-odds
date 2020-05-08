@@ -118,7 +118,7 @@ my_vars <- c("first_dist_code", "first_dist_name", "first_hs_code",
              "scale_score_8_read", "scale_score_11_math", "scale_score_11_read")
 
 faketucky <- faketucky_20160923 %>% 
-  select(all_of(my_vars))
+  select(my_vars)
 ```
 
 ### Giving Feedback on this Guide
