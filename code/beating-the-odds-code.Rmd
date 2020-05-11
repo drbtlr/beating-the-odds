@@ -454,7 +454,7 @@ bind_rows(df_math, df_read) %>%
        title = "Distribution of Beating-the-Odds Schools in Math and Reading") 
 ```
 
-**Add text here.**
+Creating tables or plots that compare school performance levels in math and reading allows us to see whether schools perform better or worse in one or two subject areas. In this example, we see that school performance in math and reading are correlated. This information can be used to inform the way we think about best practices.
 
 ```{r bto-cuts-table, echo=TRUE}
 # Plot table
