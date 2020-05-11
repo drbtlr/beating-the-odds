@@ -636,3 +636,7 @@ bind_rows(grp_all, grp_read) %>%
   labs(x = "", y = "Percent of Students", fill = "",
        title = "School Demographics by Performance Status in Reading")
 ```
+
+---
+
+##### *This guide was originally created by Aaron Butler and Hannah Poquette in partnership with the Strategic Data Project.*
