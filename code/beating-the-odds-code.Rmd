@@ -318,24 +318,24 @@ It's always helpful to plot the results of your analysis. We've found a nice sca
 df_bto %>% 
   mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes", 
                            "BTO School", "Not a BTO School")) %>% 
-  filter(!is.na(bto_both)) %>% 
+  filter(!is.na(bto_both)) %>%
   ggplot(aes(resid_math, resid_read, color = bto_both)) +
   geom_point(size = 2, alpha = .6) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_color_manual(values = c("#E69F00", "#999999")) +
-  theme_bw() +
+  theme_minimal() +
   theme(plot.title = element_text(size = 16, face = "bold"),
         plot.subtitle = element_text(size = 14),
         axis.title = element_text(size = 12),
         axis.text = element_text(size = 11),
         legend.position = "top",
         legend.text = element_text(size = 11)) +
-  labs(x = "Math",
-       y = "Reading",
+  labs(x = "Math (actual - predicted)",
+       y = "Reading (actual - predicted)",
        color = "",
-       title = "BTO Schools in Math and Reading",
-       subtitle = "Two-year status model (actual - predicted), 2010")
+       title = "Beating-the-Odds Schools in Math and Reading",
+       subtitle = "Schools in upper-right corner are performing better than expected\nin math and reading, whereas schools in lower-left coner or under\nperforming in both subject areas.")
 ```
 
 ### BTO schools by performance
@@ -377,8 +377,8 @@ df_bto %>%
         axis.text = element_text(size = 11),
         legend.position = "top",
         legend.text = element_text(size = 11)) +
-  labs(x = "Math Residual", y = "Number of Schools", fill = "",
-       title = "Distribution of BTO Schools by Math Residual") 
+  labs(x = "Math (actual - predicted)", y = "Number of Schools", fill = "",
+       title = "Distribution of Beating-the-Odds Schools in Math") 
 
 # // Step 2: Set performance levels
 df_cuts <- df_bto %>% 
@@ -451,7 +451,7 @@ bind_rows(df_math, df_read) %>%
         legend.position = "top",
         legend.text = element_text(size = 11)) +
   labs(x = "", y = "Number of Schools", fill = "",
-       title = "Distribution of BTO Schools in Math and Reading") 
+       title = "Distribution of Beating-the-Odds Schools in Math and Reading") 
 ```
 
 **Add text here.**
@@ -579,7 +579,7 @@ bind_rows(grp_all, grp_math) %>%
   mutate(group = fct_relevel(
     group, "All students", "High performing","Low performing", "Other"
     )) %>% 
-  mutate(value = round(value * 100), 1) %>% 
+  mutate(value = round(value * 100, 1)) %>% 
   mutate(name = case_when(
     name == "prop_white" ~ "White",
     name == "prop_frpl" ~ "Low Income",
@@ -590,6 +590,7 @@ bind_rows(grp_all, grp_math) %>%
   geom_col(position = position_dodge(.85), width = .8) +
   geom_text(aes(label = round(value, 1)),
             position = position_dodge(.85), vjust = -.45) +
+  expand_limits(y = c(0, 100)) +
   scale_fill_manual(values = c("#999999", "#E69F00", "#56B4E9", "#009E73")) +
   theme_minimal() +
   theme(panel.grid.major.x = element_blank(),
@@ -609,7 +610,7 @@ bind_rows(grp_all, grp_read) %>%
   mutate(group = fct_relevel(
     group, "All students", "High performing","Low performing", "Other"
   )) %>% 
-  mutate(value = round(value * 100), 1) %>% 
+  mutate(value = round(value * 100, 1)) %>% 
   mutate(name = case_when(
     name == "prop_white" ~ "White",
     name == "prop_frpl" ~ "Low Income",
@@ -620,6 +621,7 @@ bind_rows(grp_all, grp_read) %>%
   geom_col(position = position_dodge(.85), width = .8) +
   geom_text(aes(label = round(value, 1)),
             position = position_dodge(.85), vjust = -.45) +
+  expand_limits(y = c(0, 100)) +
   scale_fill_manual(values = c("#999999", "#E69F00", "#56B4E9", "#009E73")) +
   theme_minimal() +
   theme(panel.grid.major.x = element_blank(),
