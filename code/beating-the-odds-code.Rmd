@@ -224,7 +224,7 @@ Multilevel models are a powerful and flexible extension to conventional regressi
 We fit a two-level multilevel model for each subject area outcome of interest--ACT math and reading--using the `lmer` function in the `lme4` package. We recommend you read the [lme4 Reference Manual](https://cran.r-project.org/web/packages/lme4/lme4.pdf) and vignette [Fitting Linear Mixed-Effects Models Using lme4](https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf) before you fit your models. These resources contain a wealth of information. 
 
 ```{r fit-models, echo=TRUE}
-# // Step 2: Fit multilevel models for each subject area  
+# Fit multilevel models for each subject area  
 m_math <- lmer(
   # Define model formula
   formula = scale_score_11_math ~ 
@@ -257,12 +257,12 @@ Examine the coefficients and standard errors for each variable. Ask yourself if 
 For information on other model checking and sensitivity analysis for multilevel models, see Snijders and Berkhof's chapter on [Diagnostic Checks for Multilevel Models](https://www.stats.ox.ac.uk/~snijders/handbook_ml_ch3.pdf).
 
 ```{r inspect-fit, echo=TRUE}
-# // Step 3: Call model summary statistics
+# Call model summary statistics
 summary(m_math)
 summary(m_read)
 ```
 
-#### Step 3: Calculate statistics for beating-the-odds schools
+#### Step 4: Calculate statistics for beating-the-odds schools
 
 We used the model residuals to identify schools that were beating the odds and performing better than expected. We also evaluated schools that were performing worse than expected as well. This information can be used to provide targeted support.
 
@@ -274,11 +274,11 @@ formula:
 Confidence intervals allowed us to determination whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero.
 
 ```{r calc-bto, echo=TRUE}
-# // Step 3.1: Access school-level residuals
+# // Step 4.1: Access school-level residuals
 resids_math <- ranef(m_math)
 resids_read <- ranef(m_read)
 
-# // Step 3.2: Create function to flag BTO schools 
+# // Step 4.2: Create function to flag BTO schools 
 calc_bto <- function(.resids) {
   # Imput model residuals
   .resids %>%
@@ -293,7 +293,7 @@ calc_bto <- function(.resids) {
                         "yes", "no"))
 }
 
-# // Step 3.3: Execute function for each subject area
+# // Step 4.3: Execute function for each subject area
 bto_math <- calc_bto(resids_math) %>% 
   # Keep variables of interest. 
   # Note: we select and rename variables at the same time.
@@ -302,7 +302,7 @@ bto_math <- calc_bto(resids_math) %>%
 bto_read <- calc_bto(resids_read) %>% 
   select(first_hs_code = grp, resid_read = condval, bto_read = sig)
 
-# // Step 3.4: Merge datsets for plotting
+# // Step 4.4: Merge datsets for plotting
 
 # Merge bto datasets
 bto_read_math <- left_join(bto_read, bto_math, by = "first_hs_code") %>% 
@@ -318,7 +318,7 @@ df_names <- faketucky %>%
 df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code") 
 ```
 
-#### Step 4: Plot beating-the-odds schools
+#### Step 5: Plot beating-the-odds schools
 
 It's always helpful to plot the results of your analysis. We've found a nice scatter plot of beating-the-odds schools can be an effective visualization for communicating the overall results of the analysis. 
 
