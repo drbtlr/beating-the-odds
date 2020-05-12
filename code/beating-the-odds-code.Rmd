@@ -224,7 +224,7 @@ Multilevel models are a powerful and flexible extension to conventional regressi
 We fit a two-level multilevel model for each subject area outcome of interest--ACT math and reading--using the `lmer` function in the `lme4` package. We recommend you read the [lme4 Reference Manual](https://cran.r-project.org/web/packages/lme4/lme4.pdf) and vignette [Fitting Linear Mixed-Effects Models Using lme4](https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf) before you fit your models. These resources contain a wealth of information. 
 
 ```{r fit-models, echo=TRUE}
-# // Step 2.1: Fit multilevel models for each subject area  
+# // Step 2: Fit multilevel models for each subject area  
 m_math <- lmer(
   # Define model formula
   formula = scale_score_11_math ~ 
@@ -248,13 +248,16 @@ m_read <- lmer(
     sch_8_read_center + flag_2010_cohort + (1|first_hs_code),
   data = df_center, REML = TRUE
 )
+```
 
-# // Step 2.2: Inspecit summary statistics for model fit
-# Examine the coefficients and standard errors for each variable. Ask yourself 
-# if the estimates are in the range of reasonable possiblity. If not, go back 
-# and inspect your dataset and make sure there are no errors in data processing 
-# the data. Also inspect your dataset to make sure that the assumptions of 
-# multilevel modeling hold. 
+#### Step 3: Inspect Summary Statistics for Model Fit
+
+Examine the coefficients and standard errors for each variable. Ask yourself if the estimates are in the range of reasonable possiblity. If not, go back and inspect your dataset and make sure there are no errors in data processing the data. Also inspect your dataset to make sure that the assumptions of multilevel modeling hold. 
+
+For information on other model checking and sensitivity analysis for multilevel models, see Snijders and Berkhof's chapter on [Diagnostic Checks for Multilevel Models](https://www.stats.ox.ac.uk/~snijders/handbook_ml_ch3.pdf).
+
+```{r inspect-fit, echo=TRUE}
+# // Step 3: Call model summary statistics
 summary(m_math)
 summary(m_read)
 ```
