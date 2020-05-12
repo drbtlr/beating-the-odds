@@ -221,10 +221,10 @@ df_center <- df_sch_avg %>%
 
 Multilevel models are a powerful and flexible extension to conventional regression frameworks. This is one of the many reasons why they are so attractive to education researchers. However, this added flexibility can make fitting and interpreting such models a challenge. Here, we present a relatively simple multilevel model that takes into account school-level variation. We encourage you to read more on the topic of multilevel modeling and its application in beating-the-odds analyses. 
 
-We fit a two-level multilevel model for each subject area outcome of interest--ACT math and reading--using the `lmer` function in the `lme4` package. We recommend you read the [lme4 Reference Manual](https://cran.r-project.org/web/packages/lme4/lme4.pdf) and vignette [Fitting Linear Mixed-Effects Models Using lme4](https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf) before you fit your models. These resources contain a wealth of information. 
+We fit a two-level multilevel model for each subject area outcome of interest -- ACT math and reading -- using the `lmer` function in the `lme4` package. We recommend you read the [lme4 Reference Manual](https://cran.r-project.org/web/packages/lme4/lme4.pdf) and vignette [Fitting Linear Mixed-Effects Models Using lme4](https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf) before you fit your models. These resources contain a wealth of information. 
 
 ```{r fit-models, echo=TRUE}
-# Fit multilevel models for each subject area  
+# // Step 2: Fit multilevel models for each subject area  
 m_math <- lmer(
   # Define model formula
   formula = scale_score_11_math ~ 
@@ -257,7 +257,7 @@ Examine the coefficients and standard errors for each variable. Ask yourself if 
 For information on other model checking and sensitivity analysis for multilevel models, see Snijders and Berkhof's chapter on [Diagnostic Checks for Multilevel Models](https://www.stats.ox.ac.uk/~snijders/handbook_ml_ch3.pdf).
 
 ```{r inspect-fit, echo=TRUE}
-# Call model summary statistics
+# // Step 3: Call model summary statistics
 summary(m_math)
 summary(m_read)
 ```
@@ -323,7 +323,7 @@ df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
 It's always helpful to plot the results of your analysis. We've found a nice scatter plot of beating-the-odds schools can be an effective visualization for communicating the overall results of the analysis. 
 
 ```{r plot-bto, echo=TRUE}
-# Create scatter plot math/read residuals
+# // Step 5: Create scatter plot math/read residuals
 df_bto %>% 
   mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes", 
                            "BTO School", "Not a BTO School")) %>% 
@@ -372,7 +372,7 @@ df_bto %>%
 # We examined the distribution of BTO schools as one example
 # of how to determine performance levels. We recognize that 
 # are a number of other ways to establish performance levels.
-# Example include, referecing academic literature, technical
+# Examples include, referecing academic literature, technical
 # documents, pilot studies, statistical analyses, etc.
 df_bto %>% 
   mutate(bto_math = ifelse(bto_math == "yes", "Yes", "No")) %>%
