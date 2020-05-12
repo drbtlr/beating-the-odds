@@ -162,7 +162,7 @@ We encourage you check out Gelman and Hill's book [Data Analysis Using Regressio
 
 This beating-the-odds analysis uses a multilevel framework that incorporates school-level information into the modeling process. To prepare the analytical dataset, we calculated school averages within each school year. These variables where then centered using the grand mean of each variable. 
 
-Note: We recognize that grand-mean centering may not be an appropriate option for your analysis. We encourage you to explore other centering techniques for multilevel modeling. Gelman and Hill's [Data Analysis Using Regression and Multilevel/Hierarchical Models](http://www.stat.columbia.edu/~gelman/arm/) and Raudenbush and Bryk's [Hierarchical Linear Models](https://us.sagepub.com/en-us/nam/hierarchical-linear-models/book9230) provide further details son the different centering techniques as well as the advantages and disadvantages of their use in multilevel modeling. 
+*Note:* We recognize that grand-mean centering may not be an appropriate option for your analysis. We encourage you to explore other centering techniques for multilevel modeling. Gelman and Hill's [Data Analysis Using Regression and Multilevel/Hierarchical Models](http://www.stat.columbia.edu/~gelman/arm/) and Raudenbush and Bryk's [Hierarchical Linear Models](https://us.sagepub.com/en-us/nam/hierarchical-linear-models/book9230) provide further details on the different centering techniques as well as the advantages and disadvantages of their use in multilevel modeling. 
 
 ```{r prep-data, echo=TRUE}
 # // Step 1.1: Create school averages within year
@@ -226,13 +226,17 @@ We fit a two-level multilevel model for each subject area outcome of interest--A
 ```{r fit-models, echo=TRUE}
 # // Step 2.1: Fit multilevel models for each subject area  
 m_math <- lmer(
+  # Define model formula
   formula = scale_score_11_math ~ 
     male + race_white + frpl_ever_in_hs + sped_ever_in_hs + 
     lep_ever_in_hs + gifted_ever_in_hs + scale_score_8_math_center + 
     sch_male_center + sch_white_center + sch_frpl_center +
     sch_sped_center + sch_lep_center + sch_gifted_center +
     sch_8_math_center + flag_2010_cohort + (1|first_hs_code),
-  data = df_center, REML = TRUE
+  # Call dataframe containing the variables named in formula
+  data = df_center, 
+  # Option to use restricted maximum likelihood (REML) estimates
+  REML = TRUE
 )
 
 m_read <- lmer(
