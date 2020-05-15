@@ -345,7 +345,7 @@ df_bto %>%
        y = "Reading (actual - predicted)",
        color = "",
        title = "Beating-the-Odds Schools in Math and Reading",
-       subtitle = "Schools in upper-right corner are performing better than expected\nin math and reading, whereas schools in lower-left coner or under\nperforming in both subject areas.")
+       subtitle = "Schools in upper-right corner are performing better than expected\nin math and reading, whereas schools in lower-left corner or under\nperforming in both subject areas.")
 ```
 
 ### BTO schools by performance
