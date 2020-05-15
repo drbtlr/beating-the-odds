@@ -52,7 +52,7 @@ The purpose of this guide is to present a data-driven approach to identify beati
 
 This guide utilizes SDP's ["Faketucky"](https://github.com/opensdp/faketucky), a synthetic dataset based on real student data. While the data is synthetic, the code is not. Schools and districts wanting to conduct their own beating the odds analysis can easily adapt the code provided in this guide to their own data.
 
-Once you have identified analyses that you want to try to replicate or modify, click the "Download" buttons to download R code and sample data. You can make changes to the charts using the code and sample data, or modify the code to work with your own data. If you are familiar with GitHub, you can click "Go to Repository" and clone the entire repository to your own computer. 
+Once you have identified analyses that you want to replicate or modify, click the "Download" buttons to download R code and sample data. You can make changes to the charts using the code and sample data, or modify the code to work with your own data. If you are familiar with GitHub, you can click "Go to Repository" and clone the entire repository to your own computer. 
 
 Go to the Participate page to read about more ways to engage with the OpenSDP community or reach out for assistance in adapting this code for your specific context.
 
