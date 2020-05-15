@@ -154,6 +154,7 @@ We encourage you check out Gelman and Hill's book [Data Analysis Using Regressio
 
 - What is the structure of my data? How might it influence the model?
 - What variables do I want to include in the model? 
+- What students will be included in or excluded from the model?
 - What metrics will I use to determine appropriate model fit?
 
 **A Note on Missing Data:** It is important to determine how you want to address missing data before you begin your analysis. For simplicity, we choose to exclude students with data missing from the analyses. We recommend that you conduct a missing data analysis to determine whether your data is missing completely at random, missing at random, or missing not at random and apply the appropriate strategy to address your missing data. Andrew Gelman's chapter on [Missing-data Imputation in R](http://www.stat.columbia.edu/~gelman/arm/missing.pdf) is a great resource to help you think about your options.   
