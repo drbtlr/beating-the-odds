@@ -534,7 +534,7 @@ df_cuts %>%
 **Ask Yourself**
 
 - Do student populations differ for high- and low-performing schools?
-- How do high-/low-performing schools compare to all school?
+- How do high- and low-performing schools compare to all schools?
 
 **Analytic Technique:** Calculate the percentage of white (or minority) students, low income students, and special education students for schools in each performance level. 
 
