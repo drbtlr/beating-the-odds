@@ -371,9 +371,9 @@ df_bto %>%
 ```{r bto-cuts-plot, echo=TRUE}
 # // Step 1: Determine performance levels
 # We examined the distribution of BTO schools as one example
-# of how to determine performance levels. We recognize that 
+# of how to determine performance levels. We recognize that there
 # are a number of other ways to establish performance levels.
-# Examples include, referecing academic literature, technical
+# Examples include referecing academic literature, technical
 # documents, pilot studies, statistical analyses, etc.
 df_bto %>% 
   mutate(bto_math = ifelse(bto_math == "yes", "Yes", "No")) %>%
