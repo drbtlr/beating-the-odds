@@ -16,7 +16,7 @@ output:
 
 # Implementing a Beating the Odds Analysis 
 
-*A step-by-step guide to implementing a beating the odds analysis using a multilevel framework. Programmed in R.*
+*A step-by-step guide to implementing a beating the odds (BTO) analysis using a multilevel framework. Programmed in R.*
 
 ```{r knitrSetup, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, comment=NA}
 # Set options for knitr
