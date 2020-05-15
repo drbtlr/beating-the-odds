@@ -253,7 +253,7 @@ m_read <- lmer(
 
 #### Step 3: Inspect Summary Statistics for Model Fit
 
-Examine the coefficients and standard errors for each variable. Ask yourself if the estimates are in the range of reasonable possiblity. If not, go back and inspect your dataset and make sure there are no errors in data processing the data. Also inspect your dataset to make sure that the assumptions of multilevel modeling hold. 
+Examine the coefficients and standard errors for each variable. Ask yourself if the estimates are in the range of reasonable possiblity. If not, go back and inspect your dataset and make sure there are no errors in processing the data. Also inspect your dataset to make sure that the assumptions of multilevel modeling hold. 
 
 For information on other model checking and sensitivity analysis for multilevel models, see Snijders and Berkhof's chapter on [Diagnostic Checks for Multilevel Models](https://www.stats.ox.ac.uk/~snijders/handbook_ml_ch3.pdf).
 
