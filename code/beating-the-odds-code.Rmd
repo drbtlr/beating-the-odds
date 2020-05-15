@@ -364,7 +364,7 @@ df_bto %>%
 - How many schools are performing better than expected given their student characteristics? How many are performing worse than expected?
 - How does school performance vary by subject area?
 
-**Possible Next Steps or Action Plans:** Identity which schools are performing at different levels. Develop academic plan for schools at each performance level.
+**Possible Next Steps or Action Plans:** Identify which schools are performing at different levels. Develop academic plan for schools at each performance level.
 
 **Analytic Technique:** Count the number of schools by performance level. Plot a matrix to compare school performance across subject areas.  
 
