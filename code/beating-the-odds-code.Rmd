@@ -82,7 +82,7 @@ source("../R/functions.R")
 
 ### About the Data
 
-This guide uses SDP's ["Faketucky"](https://github.com/opensdp/faketucky) dataset. The Faketucky synthetic college-going analysis file contains high school and college outcome data for two graduating cohorts of approximately 40,000 students. There are no real children in the dataset, but it mirrors the relationships between variables present in real data. The dataset was developed as an offshoot of [SDP's College-Going Diagnostic for Kentucky](https://cepr.harvard.edu/publications/sdp-college-going-diagnostic-kentucky), using the R [synthpop](https://cran.r-project.org/web/packages/synthpop/index.html) package. In addition, we created school-level aggregates for each variables. The first step of the analysis "Prepare data for analysis" describes the steps to create the school-level variables.
+This guide uses SDP's ["Faketucky"](https://github.com/opensdp/faketucky) dataset. The Faketucky synthetic college-going analysis file contains high school and college outcome data for two graduating cohorts of approximately 40,000 students. There are no real children in the dataset, but it mirrors the relationships between variables present in real data. The dataset was developed as an offshoot of [SDP's College-Going Diagnostic for Kentucky](https://cepr.harvard.edu/publications/sdp-college-going-diagnostic-kentucky), using the R [synthpop](https://cran.r-project.org/web/packages/synthpop/index.html) package. In addition, we created school-level aggregates for each variable. The first step of the analysis "Prepare data for analysis" describes the steps to create the school-level variables.
 
 Below is a list of variables and descriptions used in the analyses:
 
