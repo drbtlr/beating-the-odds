@@ -271,14 +271,14 @@ We used the model residuals to identify three groups of schools:
 * schools that performed the same as expected
 * schools that performed worse than expected
 
-This last group can be helpful as the information can be used to provide targeted support.
+This last group can also be helpful as the information can be used to provide targeted support.
 
 We constructed a 95 percent confidence interval around each school's residual, using the
 formula: 
 
 ```95 percent confidence interval = School residual ±1.96 × Residual standard error.```
 
-Confidence intervals allowed us to determination whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero and the residual was positive.
+Confidence intervals allowed us to determination whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero and if the residual was positive.
 
 ```{r calc-bto, echo=TRUE}
 # // Step 4.1: Access school-level residuals
@@ -455,7 +455,7 @@ bind_rows(df_math, df_read) %>%
   geom_col(position = position_dodge(.85), width = .8) +
   geom_text(aes(label = n),
             position = position_dodge(.85), vjust = -.45) +
-  scale_fill_manual(values = c("#E69F00", "#999999")) +
+  scale_fill_manual(values = c("#999999", "#E69F00")) +
   theme_minimal() +
   theme(panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
