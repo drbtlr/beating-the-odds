@@ -267,9 +267,9 @@ summary(m_read)
 
 We used the model residuals to identify three groups of schools:
 
-*schools that were beating the odds and performed better than expected
-*schools that performed the same as expected
-*schools that performed worse than expected
+* schools that were beating the odds and performed better than expected
+* schools that performed the same as expected
+* schools that performed worse than expected
 
 This last group can be helpful as the information can be used to provide targeted support.
 
