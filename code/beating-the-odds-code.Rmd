@@ -265,14 +265,20 @@ summary(m_read)
 
 #### Step 4: Calculate statistics for beating-the-odds schools
 
-We used the model residuals to identify schools that were beating the odds and performing better than expected. We also evaluated schools that were performing worse than expected as well. This information can be used to provide targeted support.
+We used the model residuals to identify three groups of schools:
+
+*schools that were beating the odds and performed better than expected
+*schools that performed the same as expected
+*schools that performed worse than expected
+
+This last group can be helpful as the information can be used to provide targeted support.
 
 We constructed a 95 percent confidence interval around each school's residual, using the
 formula: 
 
 ```95 percent confidence interval = School residual ±1.96 × Residual standard error.```
 
-Confidence intervals allowed us to determination whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero.
+Confidence intervals allowed us to determination whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero and the residual was positive.
 
 ```{r calc-bto, echo=TRUE}
 # // Step 4.1: Access school-level residuals
@@ -287,7 +293,7 @@ calc_bto <- function(.resids) {
     data.frame() %>% 
     # Set benchmark at +2 standard deviations
     mutate(pos_bench = condsd * 1.96,
-           neg_bench = condsd * -1.96,) %>% 
+           neg_bench = condsd * -1.96) %>% 
     # Flag schools that perferm above/below benchmark (i.e., BTOs)
     mutate(sig = ifelse(condval >= pos_bench | 
                           condval <= neg_bench, 
