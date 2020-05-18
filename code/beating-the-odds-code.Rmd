@@ -222,7 +222,7 @@ df_center <- df_sch_avg %>%
 
 Multilevel models are a powerful and flexible extension to conventional regression frameworks. This is one of the many reasons why they are so attractive to education researchers. However, this added flexibility can make fitting and interpreting such models a challenge. Here, we present a relatively simple multilevel model that takes into account school-level variation. We encourage you to read more on the topic of multilevel modeling and its application in beating-the-odds analyses. 
 
-We fit a two-level multilevel model for each subject area outcome of interest -- ACT math and reading -- using the `lmer` function in the `lme4` package. We recommend you read the [lme4 Reference Manual](https://cran.r-project.org/web/packages/lme4/lme4.pdf) and vignette [Fitting Linear Mixed-Effects Models Using lme4](https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf) before you fit your models. These resources contain a wealth of information. 
+We fit a two-level multilevel model for each subject area outcome of interest -- ACT math and reading -- using the `lmer` function in the `lme4` package. Specifically, these models use a random intercept framework, which allows the school-level intercept to vary randomly around a cross-school mean. We recommend you read the [lme4 Reference Manual](https://cran.r-project.org/web/packages/lme4/lme4.pdf) and vignette [Fitting Linear Mixed-Effects Models Using lme4](https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf) before you fit your models. These resources contain a wealth of information. 
 
 ```{r fit-models, echo=TRUE}
 # // Step 2: Fit multilevel models for each subject area  
