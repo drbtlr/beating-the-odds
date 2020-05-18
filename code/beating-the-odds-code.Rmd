@@ -14,9 +14,9 @@ output:
     number_sections: false
 ---
 
-# Implementing a Beating the Odds Analysis 
+# Implementing a Beating-the-Odds Analysis 
 
-*A step-by-step guide to implementing a beating the odds (BTO) analysis using a multilevel framework. Programmed in R.*
+*A step-by-step guide to implementing a beating-the-odds (BTO) analysis using a multilevel framework. Programmed in R.*
 
 ```{r knitrSetup, echo=FALSE, error=FALSE, message=FALSE, warning=FALSE, comment=NA}
 # Set options for knitr
@@ -44,13 +44,13 @@ In this guide, you will use statistical models to predict school performance bas
 
 ### Purpose and Overview of Analyses
 
-School leaders often want to identify promising practices that distinguish high-performing schools from their counterparts and facilitate the transfer of some of these practices to struggling schools. A beating the odds analysis is one approach school leaders can take to identify schools that perform better or worse than expected, given the unique student populations they serve.
+School leaders often want to identify promising practices that distinguish high-performing schools from their counterparts and facilitate the transfer of some of these practices to struggling schools. A beating-the-odds analysis is one approach school leaders can take to identify schools that perform better or worse than expected, given the unique student populations they serve.
 
 The purpose of this guide is to present a data-driven approach to identify beating-the-odds schools. We use multilevel models to predict student performance and school-level effects on that performance. Next, we compare each school's predicted performance to its actual performance. The school is identified as beating the odds if its actual performance is higher or lower than predicted by a statistically significant margin. The procedures presented in this guide parallel those used in a collaborative study by the [Kentucky Department of Education](https://education.ky.gov/) and [REL Appalachia](https://ies.ed.gov/ncee/edlabs/regions/appalachia/).
 
 ### Using this Guide
 
-This guide utilizes SDP's ["Faketucky"](https://github.com/opensdp/faketucky), a synthetic dataset based on real student data. While the data is synthetic, the code is not. Schools and districts wanting to conduct their own beating the odds analysis can easily adapt the code provided in this guide to their own data.
+This guide utilizes SDP's ["Faketucky"](https://github.com/opensdp/faketucky), a synthetic dataset based on real student data. While the data is synthetic, the code is not. Schools and districts wanting to conduct their own beating-the-odds analysis can easily adapt the code provided in this guide to their own data.
 
 Once you have identified analyses that you want to replicate or modify, click the "Download" buttons to download R code and sample data. You can make changes to the charts using the code and sample data, or modify the code to work with your own data. If you are familiar with GitHub, you can click "Go to Repository" and clone the entire repository to your own computer. 
 
