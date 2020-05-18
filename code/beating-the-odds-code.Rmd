@@ -278,7 +278,7 @@ formula:
 
 ```95 percent confidence interval = School residual ±1.96 × Residual standard error.```
 
-Confidence intervals allowed us to determination whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero and if the residual was positive.
+Confidence intervals allowed us to determine whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero and if the residual was positive. Conversely, schools were identified as performing worse than expected if the 95 percent confidence interval did not include zero and if the residual was negative. Schools that performed as expected were those with confidence intervals that included zero.
 
 ```{r calc-bto, echo=TRUE}
 # // Step 4.1: Access school-level residuals
@@ -332,14 +332,14 @@ It's always helpful to plot the results of your analysis. We've found a nice sca
 ```{r plot-bto, echo=TRUE}
 # // Step 5: Create scatter plot math/read residuals
 df_bto %>% 
-  mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes", 
-                           "BTO School", "Not a BTO School")) %>% 
+  mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes",
+                          "Performed Better/Worse than Expected", "Performed As Expected")) %>%
   filter(!is.na(bto_both)) %>%
   ggplot(aes(resid_math, resid_read, color = bto_both)) +
   geom_point(size = 2, alpha = .6) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_hline(yintercept = 0, linetype = "dashed") +
-  scale_color_manual(values = c("#E69F00", "#999999")) +
+  scale_color_manual(values = c("#999999", "#E69F00")) +
   theme_minimal() +
   theme(plot.title = element_text(size = 16, face = "bold"),
         plot.subtitle = element_text(size = 14),
