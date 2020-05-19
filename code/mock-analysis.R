@@ -40,6 +40,32 @@ ggplot(faketucky, aes(scale_score_11_read)) +
 # scale_score_8_math
 # scale_score_8_read
 
+## missting data imputation ----
+
+library(naniar)
+library(simputation)
+
+faketucky %>% 
+  select(male, race_ethnicity, frpl_ever_in_hs,
+         sped_ever_in_hs, lep_ever_in_hs, gifted_ever_in_hs,
+         scale_score_8_math, scale_score_8_read,
+         scale_score_11_math, scale_score_11_read) %>% 
+  miss_var_summary()
+
+x <- faketucky %>% 
+  impute_lm(scale_score_8_math ~ male + race_ethnicity + frpl_ever_in_hs + sped_ever_in_hs) %>%
+  impute_lm(scale_score_8_read ~ male + race_ethnicity + frpl_ever_in_hs + sped_ever_in_hs) %>%
+  impute_lm(scale_score_11_math ~ male + race_ethnicity + frpl_ever_in_hs + sped_ever_in_hs) %>%
+  impute_lm(scale_score_11_read ~ male + race_ethnicity + frpl_ever_in_hs + sped_ever_in_hs) 
+
+x %>% 
+  select(male, race_ethnicity, frpl_ever_in_hs,
+         sped_ever_in_hs, lep_ever_in_hs, gifted_ever_in_hs,
+         scale_score_8_math, scale_score_8_read,
+         scale_score_11_math, scale_score_11_read) %>% 
+  miss_var_summary()
+
+
 # step 1: create school averages within year ----
 df_sch_avg <- faketucky %>% 
   # conver race_ethnicity to factor
