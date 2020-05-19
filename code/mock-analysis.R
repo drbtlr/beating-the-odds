@@ -65,6 +65,56 @@ x %>%
          scale_score_11_math, scale_score_11_read) %>% 
   miss_var_summary()
 
+## more eda
+
+# outcome vars
+x %>% 
+  pivot_longer(cols = c("scale_score_11_math", "scale_score_11_read")) %>%
+  ggplot(aes(value, fill = name)) +
+  geom_histogram(binwidth = 1, alpha = .6) +
+  facet_grid(~chrt_ninth) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+# school averages
+library(gt)
+
+df_avg <- x %>% 
+  mutate(race_white = ifelse(race_ethnicity == "White", 1, 0)) %>% 
+  group_by(chrt_ninth) %>%
+  summarise_at(c("male", "race_white", "frpl_ever_in_hs", "sped_ever_in_hs", 
+                 "lep_ever_in_hs", "scale_score_8_math", "scale_score_8_read"),
+               mean, na.rm = TRUE) %>% 
+  ungroup() %>% 
+  pivot_longer(-chrt_ninth,
+               names_to = "vars",
+               values_to = "avg") %>%
+  pivot_wider(names_from = chrt_ninth,
+              names_prefix = "avg_",
+              values_from = avg)
+  
+df_sd <- x %>% 
+  mutate(race_white = ifelse(race_ethnicity == "White", 1, 0)) %>% 
+  group_by(chrt_ninth) %>%
+  summarise_at(c("male", "race_white", "frpl_ever_in_hs", "sped_ever_in_hs", 
+                 "lep_ever_in_hs", "scale_score_8_math", "scale_score_8_read"),
+               sd, na.rm = TRUE) %>% 
+  ungroup() %>% 
+  pivot_longer(-chrt_ninth,
+               names_to = "vars",
+               values_to = "sd") %>% 
+  pivot_wider(names_from = chrt_ninth,
+              names_prefix = "sd_",
+              values_from = sd)
+
+gt(data=left_join(df_avg, df_sd)) %>% 
+  tab_spanner(label = "2009",
+              columns = vars(avg_2009, sd_2009)) %>% 
+  tab_spanner(label = "2010",
+              columns = vars(avg_2010, sd_2010)) %>% 
+  cols_label(vars="School-Level\nCharacteristic", 
+             avg_2009="Mean", sd_2009="SD",
+             avg_2010="Mean", sd_2010="SD")
 
 # step 1: create school averages within year ----
 df_sch_avg <- faketucky %>% 
