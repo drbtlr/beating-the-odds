@@ -656,4 +656,4 @@ bind_rows(grp_all, grp_read) %>%
 
 ---
 
-##### *This guide was originally created by Aaron Butler and Hannah Poquette in partnership with the Strategic Data Project.*
+##### *This guide was originally created by [Aaron Butler](https://www.aaronjbutler.com/) and Hannah Poquette in partnership with the Strategic Data Project.*
