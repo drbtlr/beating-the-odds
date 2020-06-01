@@ -178,11 +178,16 @@ df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code") %>%
 
 #*******************************************************************************************ADD - reading and math residual correlations
  df_bto %>%
-  select(resid_math, resid_read) %>%
+  # filter(bto_math=="yes"|bto_read=="yes") %>% # corr goes up when you look at bto schools
+  # filter(bto_math=="no"|bto_read=="no") %>% # not so much with non-bto schools
+   select(resid_math, resid_read) %>%
    cor(use="complete.obs")
 
 #Interestingly, it looks like schools performance in math and reading are positively correlated, so as the residual of math performance increase,
  #the residual of reading performance increases as well.
+ 
+## AB - Is this what REL used to as a validity test? 
+ 
 #********************************************************************************************
 
 # step 5: plot ----
