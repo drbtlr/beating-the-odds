@@ -1,7 +1,7 @@
 ---
 title: "Beating the Odds"
 author: "Aaron Butler & Hannah Poquette"
-date: "May XX, 2020"
+date: "June XX, 2020"
 output: 
   html_document:
     theme: simplex
