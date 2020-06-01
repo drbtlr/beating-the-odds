@@ -276,6 +276,21 @@ ggplot(df_cuts, aes(x = avg_8_math_prank, y = resid_math, group = factor(perf_ma
 ggplot(df_cuts, aes(x = avg_8_read_prank, y = resid_read, group = factor(perf_read))) +
   geom_point(aes(color = factor(perf_read)))
 
+# AB - I like this. Tying a bar plot, by quintiles.
+df_cuts %>% 
+  drop_na(perf_math, avg_8_math_prank) %>% 
+  mutate(ma_ntile = ntile(avg_8_read_prank, 5) %>% factor()) %>%
+  ggplot(aes(ma_ntile, resid_math)) +
+  geom_col(aes(fill=factor(perf_math)), position="dodge") +
+  coord_flip()
+
+library(ggridges)
+df_cuts %>% 
+  drop_na(perf_math, avg_8_math_prank) %>% 
+  mutate(ma_ntile = ntile(avg_8_read_prank, 5) %>% factor()) %>%
+  ggplot(aes(x=resid_math, y=ma_ntile, fill=ma_ntile)) +
+  geom_density_ridges(scale=3, size=.25, alpha=.6) +
+  theme_minimal()
 
 #Look at the average eigth grade scores of those with medium/large positive status and those not having that status.
 high_math_avg <- df_cuts %>%
