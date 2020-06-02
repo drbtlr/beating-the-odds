@@ -526,7 +526,7 @@ df_cuts %>%
 
 ### BTO schools by prior performance
 
-**Purpose:** This analysis compares prior achievement by BTO performance levels to better understand the progross made by schools in the different performance groups.  
+**Purpose:** This analysis compares prior achievement by BTO performance levels to better understand the progress made by schools in the different performance groups.  
 
 **Required Analysis File Variables:**
 
