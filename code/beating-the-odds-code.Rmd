@@ -570,7 +570,7 @@ tmp_ma <- left_join(df_cuts, df_avg_prior_ach) %>%
 
 tmp_rd <- left_join(df_cuts, df_avg_prior_ach) %>% 
   select(perf = perf_read, avg_prank = avg_8_read_prank) %>% 
-  mutate(subject = "Read")
+  mutate(subject = "Reading")
 
 df_plot <- bind_rows(tmp_ma, tmp_rd) %>% drop_na()
 
