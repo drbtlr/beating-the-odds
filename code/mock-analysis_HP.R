@@ -103,6 +103,8 @@ m_math <- lmer(
 )
 
 summary(m_math)
+.3799/(11.6758+.3799)
+
 
 m_read <- lmer(
   scale_score_11_read ~ 
@@ -159,10 +161,9 @@ df_names <- faketucky %>%
   mutate(first_hs_code = as.numeric(first_hs_code))
 
 #*******************************************************************************************ADD - 8th grade school achievement averages
+# step 1 - calc average prior achievement for each school
 df_8assess_avg <- faketucky %>%
-  filter(chrt_ninth == "2009",
-         !is.nan(scale_score_8_math),
-         !is.nan(scale_score_8_read)) %>%
+  filter(chrt_ninth == "2009") %>%
   select(sid, first_hs_code, scale_score_8_math, scale_score_8_read) %>%
   group_by(first_hs_code) %>%
   summarise(avg_8_read = mean(scale_score_8_read, na.rm = T),
@@ -171,7 +172,7 @@ df_8assess_avg <- faketucky %>%
          avg_8_read_prank = rank(avg_8_read)/length(avg_8_read)*100,
          avg_8_math_prank = rank(avg_8_math)/length(avg_8_math)*100)
 
-# merge bto + school info datasets
+# step 2 - merge bto + school info datasets
 df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code") %>%
   left_join(df_8assess_avg, by = "first_hs_code")
 #*******************************************************************************************
@@ -291,6 +292,29 @@ df_cuts %>%
   ggplot(aes(x=resid_math, y=ma_ntile, fill=ma_ntile)) +
   geom_density_ridges(scale=3, size=.25, alpha=.6) +
   theme_minimal()
+
+# purpose ->
+# School leaders may want to know whether BTO schools are limited to previoulsy high-/low-performing cohorts.
+# This analysis compares prior achievement by BTO performance levels to better understand...
+# the progross made by schools in the different performance groups.
+
+# ask yourself ->
+# To what extent is prior achievement related to BTO performance levels? What can we infer from these findings?
+# How does prior achievement and BTO performance levels differ by subject area? 
+
+# analytic technique
+# Calcualte the average prior achievement for each school in the BTO analyis then
+# rank schools by their score. 
+
+# make plot pretty
+df_cuts %>%
+  drop_na(perf_math, avg_8_math_prank) %>%
+  ggplot(aes(perf_math, avg_8_math_prank)) +
+  geom_boxplot(aes(group=perf_math)) +
+  scale_x_continuous(breaks = seq(-3,3,1)) +
+  theme_minimal()
+
+
 
 #Look at the average eigth grade scores of those with medium/large positive status and those not having that status.
 high_math_avg <- df_cuts %>%
