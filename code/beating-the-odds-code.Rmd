@@ -524,6 +524,86 @@ df_cuts %>%
        title = "School Counts by Performance Categories for Math and Reading")
 ```
 
+### BTO schools by prior performance
+
+**Purpose:** This analysis compares prior achievement by BTO performance levels to better understand the progross made by schools in the different performance groups.  
+
+**Required Analysis File Variables:**
+
+- `first_hs_code`
+- `chrt_ninth`
+- `scale_score_8_math` 
+- `scale_score_8_read`
+- `resid_math`
+- `resid_read`
+- `bto_math`
+- `bto_read`
+
+**Ask Yourself**
+
+- To what extent is prior achievement related to BTO performance levels? What can we infer from these findings?
+- How does prior achievement and BTO performance levels differ by subject area? 
+
+**Analytic Technique:** Calcualte the average prior achievement for each school in the BTO analyis then rank schools by their score.
+
+```{r bto-prior-perf-plot, echo=TRUE}
+# // Step 1: Calculate average prior achievement for each school
+df_avg_prior_ach <- faketucky %>%
+  # Restrict to first cohort
+  filter(chrt_ninth == "2009") %>%
+  select(first_hs_code, scale_score_8_math, scale_score_8_read) %>%
+  # Calculate average scores by subject
+  group_by(first_hs_code) %>%
+  summarise(avg_8_read = mean(scale_score_8_read, na.rm = TRUE),
+            avg_8_math = mean(scale_score_8_math, na.rm = TRUE)) %>%
+  # Rank schools by subject
+  mutate(first_hs_code = as.numeric(first_hs_code),
+         avg_8_read_prank = rank(avg_8_read)/length(avg_8_read)*100,
+         avg_8_math_prank = rank(avg_8_math)/length(avg_8_math)*100)
+
+# // Step 2: Create temp datasets for plotting
+# As a workaround, create separate datasets for math and reading then
+# append datasets for plotting.
+tmp_ma <- left_join(df_cuts, df_avg_prior_ach) %>% 
+  select(perf = perf_math, avg_prank = avg_8_math_prank) %>% 
+  mutate(subject = "Math")
+
+tmp_rd <- left_join(df_cuts, df_avg_prior_ach) %>% 
+  select(perf = perf_read, avg_prank = avg_8_read_prank) %>% 
+  mutate(subject = "Read")
+
+df_plot <- bind_rows(tmp_ma, tmp_rd) %>% drop_na()
+
+# // Step 3: Plot
+df_plot %>% 
+  mutate(perf = case_when(
+    perf == -3 ~ "Large\nnegative\ndecrease",
+    perf == -2 ~ "Medium\nnegative\ndecrease",
+    perf == -1 ~ "Small\nnegative\ndecrease",
+    perf == 0 ~ "No\nsignificant\ndecrease",
+    perf == 1 ~ "Small\npositive\nincrease",
+    perf == 2 ~ "Medium\npositive\nincrease",
+    perf == 3 ~ "Large\npositive\nincrease"
+  )) %>% 
+  mutate(perf = fct_relevel(
+    perf, 
+    "Large\nnegative\ndecrease", "Medium\nnegative\ndecrease", 
+    "Small\nnegative\ndecrease", "No\nsignificant\ndecrease", 
+    "Small\npositive\nincrease", "Medium\npositive\nincrease", 
+    "Large\npositive\nincrease")) %>%
+  ggplot(aes(factor(perf), avg_prank, fill=subject)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("#E69F00", "#999999")) +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),
+        plot.title = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 11),
+        legend.position = "top") +
+  labs(x = "Performance Level", y = "Percentile Rank", fill = "",
+       title = "Prior Performance by Beating-the-Odds Performance Categories")
+```
+
 ### BTO schools by student demographics
 
 **Purpose:** This analysis explores the student demographics of schools at different performance levels. 
