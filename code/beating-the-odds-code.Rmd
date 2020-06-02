@@ -354,7 +354,7 @@ df_bto %>%
        subtitle = "Schools in upper-right corner are performing better than expected\nin math and reading, whereas schools in lower-left corner or under\nperforming in both subject areas.")
 ```
 
-### BTO schools by performance
+### BTO schools by performance level
 
 **Purpose:** This analysis examines the distribution of beating-the-odds schools in math and reading and establishes performance levels (ex. small, medium, or large changes in between the predicted and actual school performance). Results provide an overall summary of a beating-the-odds analysis.  
 
