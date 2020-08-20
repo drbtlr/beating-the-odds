@@ -67,17 +67,12 @@ To install packages, such as `lme4`, run the following command in the R console:
 
 `install.packages("lme4")`
 
-In addition, this guide will draw from OpenSDP-written functions defined in the `functions.R` document, which is located in the `R` folder of this guide's GitHub repository. Please make sure to have downloaded the entire GitHub repository to run this code.
-
 After installing your R packages and downloaded this guide's GitHub repository, run the chunk of code below to load them onto your computer.
 
 ```{r load-packages, echo=TRUE}
 # Load packages
 library(tidyverse)
 library(lme4)
-
-# Read in some R functions that are convenience wrappers
-source("../R/functions.R")
 ```
 
 ### About the Data
@@ -312,17 +307,17 @@ bto_read <- calc_bto(resids_read) %>%
 # // Step 4.4: Merge datasets for plotting
 
 # Merge BTO datasets
-bto_read_math <- left_join(bto_read, bto_math, by = "first_hs_code") %>% 
+df_bto <- left_join(bto_read, bto_math, by = "first_hs_code") #%>% 
   # Convert high school work to numeric for merge
-  mutate(first_hs_code = as.numeric(first_hs_code))
+#  mutate(first_hs_code = as.numeric(first_hs_code))
 
-# Pull school and district info from original dataset
-df_names <- faketucky %>% 
-  select(first_dist_code, first_hs_code, first_dist_name, first_hs_name) %>% 
-  distinct()
-
-# Merge BTO and school info datasets
-df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code") 
+# # Pull school and district info from original dataset
+# df_names <- faketucky %>% 
+#   select(first_dist_code, first_hs_code, first_dist_name, first_hs_name) %>% 
+#   distinct()
+# 
+# # Merge BTO and school info datasets
+# df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code") 
 ```
 
 #### Step 5: Plot beating-the-odds schools
