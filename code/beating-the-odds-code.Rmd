@@ -253,7 +253,7 @@ m_read <- lmer(
 
 #### Step 3: Inspect Summary Statistics for Model Fit
 
-Examine the coefficients and standard errors for each variable. Ask yourself if the estimates are in the range of reasonable possiblity. If not, go back and inspect your dataset and make sure there are no errors in processing the data. Also inspect your dataset to make sure that the assumptions of multilevel modeling hold. 
+Examine the coefficients and standard errors for each variable. Ask yourself if the estimates are in the range of reasonable possibility. If not, go back and inspect your dataset and make sure there are no errors in processing the data. Also inspect your dataset to make sure that the assumptions of multilevel modeling hold. 
 
 For information on other model checking and sensitivity analysis for multilevel models, see Snijders and Berkhof's chapter on [Diagnostic Checks for Multilevel Models](https://www.stats.ox.ac.uk/~snijders/handbook_ml_ch3.pdf).
 
@@ -287,14 +287,14 @@ resids_read <- ranef(m_read)
 
 # // Step 4.2: Create function to flag BTO schools 
 calc_bto <- function(.resids) {
-  # Imput model residuals
+  # Input model residuals
   .resids %>%
     # Store as a dataframe
     data.frame() %>% 
     # Set benchmark at +2 standard deviations
     mutate(pos_bench = condsd * 1.96,
            neg_bench = condsd * -1.96) %>% 
-    # Flag schools that perferm above/below benchmark (i.e., BTOs)
+    # Flag schools that perform above/below benchmark (i.e., BTOs)
     mutate(sig = ifelse(condval >= pos_bench | 
                           condval <= neg_bench, 
                         "yes", "no"))
@@ -309,9 +309,9 @@ bto_math <- calc_bto(resids_math) %>%
 bto_read <- calc_bto(resids_read) %>% 
   select(first_hs_code = grp, resid_read = condval, bto_read = sig)
 
-# // Step 4.4: Merge datsets for plotting
+# // Step 4.4: Merge datasets for plotting
 
-# Merge bto datasets
+# Merge BTO datasets
 bto_read_math <- left_join(bto_read, bto_math, by = "first_hs_code") %>% 
   # Convert high school work to numeric for merge
   mutate(first_hs_code = as.numeric(first_hs_code))
@@ -321,7 +321,7 @@ df_names <- faketucky %>%
   select(first_dist_code, first_hs_code, first_dist_name, first_hs_name) %>% 
   distinct()
 
-# Merge bto and school info datasets
+# Merge BTO and school info datasets
 df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code") 
 ```
 
@@ -380,7 +380,7 @@ df_bto %>%
 # We examined the distribution of BTO schools as one example
 # of how to determine performance levels. We recognize that there
 # are a number of other ways to establish performance levels.
-# Examples include referecing academic literature, technical
+# Examples include referencing academic literature, technical
 # documents, pilot studies, statistical analyses, etc.
 df_bto %>% 
   mutate(bto_math = ifelse(bto_math == "yes", "Yes", "No")) %>%
@@ -412,7 +412,7 @@ df_cuts <- df_bto %>%
     bto_math == "yes" & between(resid_math, -1, -.5) ~ -2,
     bto_math == "yes" & resid_math < -1 ~ -3
   )) %>% 
-  # Set performance cuts for reading, repete previous steps
+  # Set performance cuts for reading, repeat previous steps
   mutate(perf_read = case_when(
     bto_read == "no" ~ 0,
     bto_read == "yes" & between(resid_read, 0, .5) ~ 1,
@@ -544,7 +544,7 @@ df_cuts %>%
 - To what extent is prior achievement related to BTO performance levels? What can we infer from these findings?
 - How does prior achievement and BTO performance levels differ by subject area? 
 
-**Analytic Technique:** Calcualte the average prior achievement for each school in the BTO analyis then rank schools by their score.
+**Analytic Technique:** Calculate the average prior achievement for each school in the BTO analysis then rank schools by their score.
 
 ```{r bto-prior-perf-plot, echo=TRUE}
 # // Step 1: Calculate average prior achievement for each school
