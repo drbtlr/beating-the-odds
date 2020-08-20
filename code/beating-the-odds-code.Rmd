@@ -160,8 +160,10 @@ This beating-the-odds analysis uses a multilevel framework that incorporates sch
 
 *Note:* We recognize that grand-mean centering may not be an appropriate option for your analysis. We encourage you to explore other centering techniques for multilevel modeling. Gelman and Hill's [Data Analysis Using Regression and Multilevel/Hierarchical Models](http://www.stat.columbia.edu/~gelman/arm/) and Raudenbush and Bryk's [Hierarchical Linear Models](https://us.sagepub.com/en-us/nam/hierarchical-linear-models/book9230) provide further details on the different centering techniques as well as the advantages and disadvantages of their use in multilevel modeling. 
 
-```{r prep-data, echo=TRUE}
-# // Step 1.1: Create school averages within year
+#### Step 1.1: Calculate school averages within year
+
+```{r calc-avgs, echo=TRUE}
+# Calculate school averages
 df_sch_avg <- faketucky %>% 
   # Create indicator for students identifying as white
   mutate(race_white = ifelse(race_ethnicity == "White", 1, 0)) %>% 
@@ -178,8 +180,12 @@ df_sch_avg <- faketucky %>%
          sch_8_read = mean(scale_score_8_read, na.rm = TRUE)) %>% 
   # Remember to ungroup
   ungroup()
+```
 
-# // Step 1.2: Center variables around grand mean within year
+#### Step 1.2: Center variables around grand mean within year 
+
+```{r center-vars, echo=TRUE}
+# Center variables around grand mean
 df_center <- df_sch_avg %>% 
   # Flag 2010 cohort
   mutate(flag_2010_cohort = ifelse(chrt_ninth == 2010, 1, 0)) %>% 
@@ -220,7 +226,7 @@ Multilevel models are a powerful and flexible extension to conventional regressi
 We fit a two-level multilevel model for each subject area outcome of interest -- ACT math and reading -- using the `lmer` function in the `lme4` package. Specifically, these models use a random intercept framework, which allows the school-level intercept to vary randomly around a cross-school mean. We recommend you read the [lme4 Reference Manual](https://cran.r-project.org/web/packages/lme4/lme4.pdf) and vignette [Fitting Linear Mixed-Effects Models Using lme4](https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf) before you fit your models. These resources contain a wealth of information. 
 
 ```{r fit-models, echo=TRUE}
-# // Step 2: Fit multilevel models for each subject area  
+# Fit multilevel models for each subject area  
 m_math <- lmer(
   # Define model formula
   formula = scale_score_11_math ~ 
@@ -253,7 +259,7 @@ Examine the coefficients and standard errors for each variable. Ask yourself if 
 For information on other model checking and sensitivity analysis for multilevel models, see Snijders and Berkhof's chapter on [Diagnostic Checks for Multilevel Models](https://www.stats.ox.ac.uk/~snijders/handbook_ml_ch3.pdf).
 
 ```{r inspect-fit, echo=TRUE}
-# // Step 3: Call model summary statistics
+# Call model summary statistics
 summary(m_math)
 summary(m_read)
 ```
@@ -275,12 +281,18 @@ formula:
 
 Confidence intervals allowed us to determine whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero and if the residual was positive. Conversely, schools were identified as performing worse than expected if the 95 percent confidence interval did not include zero and if the residual was negative. Schools that performed as expected were those with confidence intervals that included zero.
 
-```{r calc-bto, echo=TRUE}
-# // Step 4.1: Access school-level residuals
+#### Step 4.1: Access school-level residuals
+
+```{r pull-resids, echo=TRUE}
+# Access school-level residuals
 resids_math <- ranef(m_math)
 resids_read <- ranef(m_read)
+```
 
-# // Step 4.2: Create function to flag BTO schools 
+#### Step 4.2: Create function to flag BTO schools
+
+```{r calc-bto, echo=TRUE}
+# Create function to flag BTO schools 
 calc_bto <- function(.resids) {
   # Input model residuals
   .resids %>%
@@ -294,8 +306,12 @@ calc_bto <- function(.resids) {
                           condval <= neg_bench, 
                         "yes", "no"))
 }
+```
 
-# // Step 4.3: Execute function for each subject area
+#### Step 4.3: Execute function for each subject area
+
+```{r execute, echo=TRUE}
+# Execute function for each subject area
 bto_math <- calc_bto(resids_math) %>% 
   # Keep variables of interest. 
   # Note: we select and rename variables at the same time.
@@ -303,21 +319,25 @@ bto_math <- calc_bto(resids_math) %>%
   
 bto_read <- calc_bto(resids_read) %>% 
   select(first_hs_code = grp, resid_read = condval, bto_read = sig)
+```
 
-# // Step 4.4: Merge datasets for plotting
+#### Step 4.4: Merge datasets for plotting
+
+```{r merge, echo=TRUE}
+# Merge datasets for plotting
 
 # Merge BTO datasets
-df_bto <- left_join(bto_read, bto_math, by = "first_hs_code") #%>% 
+bto_read_math <- left_join(bto_read, bto_math, by = "first_hs_code") %>% 
   # Convert high school work to numeric for merge
-#  mutate(first_hs_code = as.numeric(first_hs_code))
+  mutate(first_hs_code = as.numeric(first_hs_code))
 
-# # Pull school and district info from original dataset
-# df_names <- faketucky %>% 
-#   select(first_dist_code, first_hs_code, first_dist_name, first_hs_name) %>% 
-#   distinct()
-# 
-# # Merge BTO and school info datasets
-# df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code") 
+# Pull school and district info from original dataset
+df_names <- faketucky %>%
+  select(first_dist_code, first_hs_code, first_dist_name, first_hs_name) %>%
+  distinct()
+
+# Merge BTO and school info datasets
+df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
 ```
 
 #### Step 5: Plot beating-the-odds schools
@@ -325,7 +345,7 @@ df_bto <- left_join(bto_read, bto_math, by = "first_hs_code") #%>%
 It's always helpful to plot the results of your analysis. We've found a nice scatter plot can be an effective visualization for communicating the overall results of the analysis. 
 
 ```{r plot-bto, echo=TRUE}
-# // Step 5: Create scatter plot math/read residuals
+# Create scatter plot math/read residuals
 df_bto %>% 
   mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes",
                           "Performed Better/Worse than Expected", "Performed As Expected")) %>%
@@ -370,13 +390,12 @@ df_bto %>%
 
 **Analytic Technique:** Identify school performance levels by subtracting each school's predicted achievement from its actual achievement and determining reasonable cut points for performance categories (such as small, medium, or large). Count the number of schools by performance level and plot a matrix to compare school performance across subject areas.  
 
+#### Step 1: Determine performance levels
+
+We examined the distribution of BTO schools as one example of how to determine performance levels. We recognize that there are a number of other ways to establish performance levels. Examples include referencing academic literature, technical documents, pilot studies, statistical analyses, etc.
+
 ```{r bto-cuts-plot, echo=TRUE}
-# // Step 1: Determine performance levels
-# We examined the distribution of BTO schools as one example
-# of how to determine performance levels. We recognize that there
-# are a number of other ways to establish performance levels.
-# Examples include referencing academic literature, technical
-# documents, pilot studies, statistical analyses, etc.
+# Determine performance levels
 df_bto %>% 
   mutate(bto_math = ifelse(bto_math == "yes", "Yes", "No")) %>%
   ggplot(aes(resid_math)) +
@@ -391,8 +410,12 @@ df_bto %>%
         legend.text = element_text(size = 11)) +
   labs(x = "Math (actual - predicted)", y = "Number of Schools", fill = "",
        title = "Distribution of Beating-the-Odds Schools in Math") 
+```
 
-# // Step 2: Set performance levels
+#### Step 2: Set performance levels
+
+```{r set-perf-lvl, echo=TRUE}
+# Set performance levels
 df_cuts <- df_bto %>% 
   # Set performance cuts for math
   mutate(perf_math = case_when(
@@ -417,8 +440,12 @@ df_cuts <- df_bto %>%
     bto_read == "yes" & between(resid_read, -1, -.5) ~ -2,
     bto_read == "yes" & resid_read < -1 ~ -3
   ))
+```
 
-# // Step 2: Create temp datasets for plotting
+#### Step 3: Plot
+
+```{r plot-perf-lvl, echo=TRUE}
+# Create temp datasets for plotting
 df_math <- df_cuts %>% 
   count(perf_math) %>% 
   mutate(subject = "Math") %>% 
@@ -429,7 +456,7 @@ df_read <- df_cuts %>%
   mutate(subject = "Reading") %>% 
   select(subject, cut = perf_read, n)
 
-# // Step 3: Plot
+# Plot
 bind_rows(df_math, df_read) %>% 
   mutate(cut = case_when(
     cut == -3 ~ "Large\nnegative\ndecrease",
@@ -541,8 +568,10 @@ df_cuts %>%
 
 **Analytic Technique:** Calculate the average prior achievement for each school in the BTO analysis then rank schools by their score.
 
-```{r bto-prior-perf-plot, echo=TRUE}
-# // Step 1: Calculate average prior achievement for each school
+#### Step 1: Calculate average prior achievement for each school
+
+```{r calc-bto-prior-perf, echo=TRUE}
+# Calculate average prior achievement for each school
 df_avg_prior_ach <- faketucky %>%
   # Restrict to first cohort
   filter(chrt_ninth == "2009") %>%
@@ -555,10 +584,14 @@ df_avg_prior_ach <- faketucky %>%
   mutate(first_hs_code = as.numeric(first_hs_code),
          avg_8_read_prank = rank(avg_8_read)/length(avg_8_read)*100,
          avg_8_math_prank = rank(avg_8_math)/length(avg_8_math)*100)
+```
 
-# // Step 2: Create temp datasets for plotting
-# As a workaround, create separate datasets for math and reading then
-# append datasets for plotting.
+#### Step 2: Create temp datasets for plotting
+
+As a workaround, create separate datasets for math and reading then append datasets for plotting.
+
+```{r bto-prior-perf-plot, echo=TRUE}
+# Step 2: Create temp datasets for plotting
 tmp_ma <- left_join(df_cuts, df_avg_prior_ach) %>% 
   select(perf = perf_math, avg_prank = avg_8_math_prank) %>% 
   mutate(subject = "Math")
@@ -568,8 +601,12 @@ tmp_rd <- left_join(df_cuts, df_avg_prior_ach) %>%
   mutate(subject = "Reading")
 
 df_plot <- bind_rows(tmp_ma, tmp_rd) %>% drop_na()
+```
 
-# // Step 3: Plot
+#### Step 3: Plot
+
+```{r, echo=TRUE}
+# Plot
 df_plot %>% 
   mutate(perf = case_when(
     perf == -3 ~ "Large\nnegative\ndecrease",
@@ -621,7 +658,7 @@ df_plot %>%
 **Analytic Technique:** Calculate the percentage of white (or minority) students, low income students, and special education students for schools in each performance level. 
 
 ```{r bto-demos, echo=TRUE}
-# // Step 1: Create temp datasets for plotting
+# Create temp datasets for plotting
 grp_all <- df_sch_avg %>% 
   filter(chrt_ninth == 2010) %>% 
   summarise(prop_white = mean(sch_white, na.rm = TRUE),
@@ -663,9 +700,7 @@ grp_read <- df_cuts %>%
   pivot_longer(cols = starts_with("prop")) %>% 
   rename(group = perf_read_high_low) 
 
-# // Step 2: Plot
-
-# Math
+# Plot Math
 bind_rows(grp_all, grp_math) %>% 
   # Recode variables for plotting
   mutate(group = fct_relevel(
@@ -697,7 +732,7 @@ bind_rows(grp_all, grp_math) %>%
   labs(x = "", y = "Percent of Students", fill = "",
        title = "School Demographics by Performance Status in Math")
 
-# Reading
+# Plot Reading
 bind_rows(grp_all, grp_read) %>% 
   mutate(group = fct_relevel(
     group, "All students", "High performing","Low performing", "Other"
