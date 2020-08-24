@@ -592,11 +592,11 @@ As a workaround, create separate datasets for math and reading then append datas
 
 ```{r bto-prior-perf-plot, echo=TRUE}
 # Step 2: Create temp datasets for plotting
-tmp_ma <- left_join(df_cuts, df_avg_prior_ach) %>% 
+tmp_ma <- left_join(df_cuts, df_avg_prior_ach %>% mutate(first_hs_code = factor(first_hs_code))) %>% 
   select(perf = perf_math, avg_prank = avg_8_math_prank) %>% 
   mutate(subject = "Math")
 
-tmp_rd <- left_join(df_cuts, df_avg_prior_ach) %>% 
+tmp_rd <- left_join(df_cuts, df_avg_prior_ach%>% mutate(first_hs_code = factor(first_hs_code))) %>% 
   select(perf = perf_read, avg_prank = avg_8_read_prank) %>% 
   mutate(subject = "Reading")
 
@@ -674,7 +674,9 @@ grp_math <- df_cuts %>%
     perf_math < 0 ~ "Low performing",
     perf_math == 0 ~ "Other"
   )) %>%
-  left_join(df_sch_avg %>% filter(chrt_ninth == 2010)) %>% 
+  left_join(df_sch_avg %>% 
+              filter(chrt_ninth == 2010) %>% 
+              mutate(first_hs_code = factor(first_hs_code))) %>% 
   drop_na(perf_math_high_low) %>% 
   group_by(perf_math_high_low) %>% 
   summarise(prop_white = mean(sch_white, na.rm = TRUE),
@@ -690,7 +692,9 @@ grp_read <- df_cuts %>%
     perf_read < 0 ~ "Low performing",
     perf_read == 0 ~ "Other"
   )) %>%
-  left_join(df_sch_avg %>% filter(chrt_ninth == 2010)) %>% 
+  left_join(df_sch_avg %>% 
+              filter(chrt_ninth == 2010) %>% 
+              mutate(first_hs_code = factor(first_hs_code))) %>% 
   drop_na(perf_read_high_low) %>% 
   group_by(perf_read_high_low) %>% 
   summarise(prop_white = mean(sch_white, na.rm = TRUE),
