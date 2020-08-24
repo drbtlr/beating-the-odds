@@ -12,6 +12,8 @@ output:
     toc_depth: 3
     toc_float: true
     number_sections: false
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Implementing a Beating-the-Odds Analysis 
@@ -160,16 +162,16 @@ This beating-the-odds analysis uses a multilevel framework that incorporates sch
 
 *Note:* We recognize that grand-mean centering may not be an appropriate option for your analysis. We encourage you to explore other centering techniques for multilevel modeling. Gelman and Hill's [Data Analysis Using Regression and Multilevel/Hierarchical Models](http://www.stat.columbia.edu/~gelman/arm/) and Raudenbush and Bryk's [Hierarchical Linear Models](https://us.sagepub.com/en-us/nam/hierarchical-linear-models/book9230) provide further details on the different centering techniques as well as the advantages and disadvantages of their use in multilevel modeling. 
 
-#### Step 1.1: Calculate school averages within year
+#### Step 1.1: Calculate school averages by cohort year
 
 ```{r calc-avgs, echo=TRUE}
-# Calculate school averages
-df_sch_avg <- faketucky %>% 
+# Calculate school averages by cohort year
+sch_avg_by_cohort <- faketucky %>% 
   # Create indicator for students identifying as white
   mutate(race_white = ifelse(race_ethnicity == "White", 1, 0)) %>% 
   # Group data by high school and cohort year
   group_by(first_hs_code, chrt_ninth) %>% 
-  # Calculate school averages within year
+  # Calculate school averages
   mutate(sch_male = mean(male, na.rm = TRUE),
          sch_white = mean(race_white, na.rm = TRUE),
          sch_frpl = mean(frpl_ever_in_hs, na.rm = TRUE),
@@ -178,26 +180,23 @@ df_sch_avg <- faketucky %>%
          sch_gifted = mean(gifted_ever_in_hs, na.rm = TRUE),
          sch_8_math = mean(scale_score_8_math, na.rm = TRUE),
          sch_8_read = mean(scale_score_8_read, na.rm = TRUE)) %>% 
-  # Remember to ungroup
+  # Remember to ungroup the data frame
   ungroup()
 ```
 
-#### Step 1.2: Center variables around grand mean within year 
+#### Step 1.2: Center variables around grand mean
 
 ```{r center-vars, echo=TRUE}
-# Center variables around grand mean
-df_center <- df_sch_avg %>% 
+# Calculate across-year cohort averages
+cohort_avg <- sch_avg_by_cohort %>% 
   # Flag 2010 cohort
   mutate(flag_2010_cohort = ifelse(chrt_ninth == 2010, 1, 0)) %>% 
   # Group by cohort year
-  group_by(chrt_ninth) %>% 
-  # Center student-level variables
-  mutate(
-    scale_score_8_math_center = scale_score_8_math - mean(scale_score_8_math, 
-                                                          na.rm = TRUE),
-    scale_score_8_read_center = scale_score_8_read - mean(scale_score_8_read, 
-                                                          na.rm = TRUE)) %>% 
-  # Calculate within year mean for school-level variables
+  group_by(chrt_ninth) %>%
+  # Center prior achievement test scores
+  mutate(math_8_center = scale_score_8_math - mean(scale_score_8_math, na.rm = TRUE),
+         read_8_center = scale_score_8_read - mean(scale_score_8_read, na.rm = TRUE)) %>% 
+  # Calculate averages
   mutate(sch_male_mean_year = mean(sch_male, na.rm = TRUE),
          sch_white_mean_year = mean(sch_white, na.rm = TRUE),
          sch_frpl_mean_year = mean(sch_frpl, na.rm = TRUE),
@@ -206,9 +205,12 @@ df_center <- df_sch_avg %>%
          sch_gifted_mean_year = mean(sch_gifted, na.rm = TRUE),
          sch_8_math_mean_year = mean(sch_8_math, na.rm = TRUE),
          sch_8_read_mean_year = mean(sch_8_read, na.rm = TRUE)) %>% 
-  # Ungroup
-  ungroup() %>% 
-  # Center school-level variables
+  # Ungroup data frame
+  ungroup()
+
+# Center school-level variables
+sch_avg_center <- cohort_avg %>% 
+  # Subtract across-year averages from school averages
   mutate(sch_male_center = sch_male - sch_male_mean_year,
          sch_white_center = sch_white - sch_white_mean_year,
          sch_frpl_center = sch_frpl - sch_frpl_mean_year,
@@ -231,12 +233,12 @@ m_math <- lmer(
   # Define model formula
   formula = scale_score_11_math ~ 
     male + race_white + frpl_ever_in_hs + sped_ever_in_hs + 
-    lep_ever_in_hs + gifted_ever_in_hs + scale_score_8_math_center + 
+    lep_ever_in_hs + gifted_ever_in_hs + math_8_center + 
     sch_male_center + sch_white_center + sch_frpl_center +
     sch_sped_center + sch_lep_center + sch_gifted_center +
     sch_8_math_center + flag_2010_cohort + (1|first_hs_code),
   # Call dataframe containing the variables named in formula
-  data = df_center, 
+  data = sch_avg_center, 
   # Option to use restricted maximum likelihood (REML) estimates
   REML = TRUE
 )
@@ -244,11 +246,11 @@ m_math <- lmer(
 m_read <- lmer(
   formula = scale_score_11_read ~ 
     male + race_white + frpl_ever_in_hs + sped_ever_in_hs + 
-    lep_ever_in_hs + gifted_ever_in_hs + scale_score_8_read_center + 
+    lep_ever_in_hs + gifted_ever_in_hs + read_8_center + 
     sch_male_center + sch_white_center + sch_frpl_center +
     sch_sped_center + sch_lep_center + sch_gifted_center +
     sch_8_read_center + flag_2010_cohort + (1|first_hs_code),
-  data = df_center, REML = TRUE
+  data = sch_avg_center, REML = TRUE
 )
 ```
 
