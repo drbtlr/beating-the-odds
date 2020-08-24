@@ -326,20 +326,18 @@ bto_read <- calc_bto(resids_read) %>%
 #### Step 4.4: Merge datasets for plotting
 
 ```{r merge, echo=TRUE}
-# Merge datasets for plotting
-
 # Merge BTO datasets
 bto_read_math <- left_join(bto_read, bto_math, by = "first_hs_code")
 
 # Pull school and district info from original dataset
-df_names <- faketucky %>%
+sch_names <- faketucky %>%
   select(first_dist_code, first_hs_code, first_dist_name, first_hs_name) %>%
   distinct() %>% 
   # Convert high school work to factor for merge
   mutate(first_hs_code = factor(first_hs_code))
   
 # Merge BTO and school info datasets
-df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
+sch_bto_data <- left_join(sch_names, bto_read_math, by = "first_hs_code")
 ```
 
 #### Step 5: Plot beating-the-odds schools
@@ -348,7 +346,7 @@ It's always helpful to plot the results of your analysis. We've found a nice sca
 
 ```{r plot-bto, echo=TRUE}
 # Create scatter plot math/read residuals
-df_bto %>% 
+sch_bto_data %>% 
   mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes",
                           "Performed Better/Worse than Expected", "Performed As Expected")) %>%
   filter(!is.na(bto_both)) %>%
@@ -398,7 +396,7 @@ We examined the distribution of BTO schools as one example of how to determine p
 
 ```{r bto-cuts-plot, echo=TRUE}
 # Determine performance levels
-df_bto %>% 
+sch_bto_data %>% 
   mutate(bto_math = ifelse(bto_math == "yes", "Yes", "No")) %>%
   ggplot(aes(resid_math)) +
   geom_histogram(aes(fill = bto_math), alpha = .8) +
@@ -418,7 +416,7 @@ df_bto %>%
 
 ```{r set-perf-lvl, echo=TRUE}
 # Set performance levels
-df_cuts <- df_bto %>% 
+bto_cuts <- sch_bto_data %>% 
   # Set performance cuts for math
   mutate(perf_math = case_when(
     # No difference
@@ -448,18 +446,18 @@ df_cuts <- df_bto %>%
 
 ```{r plot-perf-lvl, echo=TRUE}
 # Create temp datasets for plotting
-df_math <- df_cuts %>% 
+bto_cuts_math <- bto_cuts %>% 
   count(perf_math) %>% 
   mutate(subject = "Math") %>% 
   select(subject, cut = perf_math, n)
 
-df_read <- df_cuts %>% 
+bto_cuts_read <- bto_cuts %>% 
   count(perf_read) %>% 
   mutate(subject = "Reading") %>% 
   select(subject, cut = perf_read, n)
 
 # Plot
-bind_rows(df_math, df_read) %>% 
+bind_rows(bto_cuts_math, bto_cuts_read) %>% 
   mutate(cut = case_when(
     cut == -3 ~ "Large\nnegative\ndecrease",
     cut == -2 ~ "Medium\nnegative\ndecrease",
@@ -499,7 +497,7 @@ Creating tables or plots that compare school performance levels in math and read
 
 ```{r bto-cuts-table, echo=TRUE}
 # Plot table
-df_cuts %>%
+bto_cuts %>%
   # Recode variable for plotting
   mutate(perf_math = case_when(
     perf_math == -3 ~ "Large\nnegative\ndecrease",
@@ -594,11 +592,11 @@ As a workaround, create separate datasets for math and reading then append datas
 
 ```{r bto-prior-perf-plot, echo=TRUE}
 # Step 2: Create temp datasets for plotting
-tmp_ma <- left_join(df_cuts, df_avg_prior_ach %>% mutate(first_hs_code = factor(first_hs_code))) %>% 
+tmp_ma <- left_join(bto_cuts, df_avg_prior_ach %>% mutate(first_hs_code = factor(first_hs_code))) %>% 
   select(perf = perf_math, avg_prank = avg_8_math_prank) %>% 
   mutate(subject = "Math")
 
-tmp_rd <- left_join(df_cuts, df_avg_prior_ach%>% mutate(first_hs_code = factor(first_hs_code))) %>% 
+tmp_rd <- left_join(bto_cuts, df_avg_prior_ach%>% mutate(first_hs_code = factor(first_hs_code))) %>% 
   select(perf = perf_read, avg_prank = avg_8_read_prank) %>% 
   mutate(subject = "Reading")
 
@@ -661,7 +659,7 @@ df_plot %>%
 
 ```{r bto-demos, echo=TRUE}
 # Create temp datasets for plotting
-grp_all <- df_sch_avg %>% 
+grp_all <- sch_avg_by_cohort %>% 
   filter(chrt_ninth == 2010) %>% 
   summarise(prop_white = mean(sch_white, na.rm = TRUE),
             prop_frpl = mean(sch_frpl, na.rm = TRUE),
@@ -670,13 +668,13 @@ grp_all <- df_sch_avg %>%
   mutate(group = "All students") %>% 
   pivot_longer(-group)
 
-grp_math <- df_cuts %>%
+grp_math <- bto_cuts %>%
   mutate(perf_math_high_low = case_when(
     perf_math > 0 ~ "High performing",
     perf_math < 0 ~ "Low performing",
     perf_math == 0 ~ "Other"
   )) %>%
-  left_join(df_sch_avg %>% 
+  left_join(sch_avg_by_cohort %>% 
               filter(chrt_ninth == 2010) %>% 
               mutate(first_hs_code = factor(first_hs_code))) %>% 
   drop_na(perf_math_high_low) %>% 
@@ -688,13 +686,13 @@ grp_math <- df_cuts %>%
   pivot_longer(cols = starts_with("prop")) %>% 
   rename(group = perf_math_high_low)
 
-grp_read <- df_cuts %>%
+grp_read <- bto_cuts %>%
   mutate(perf_read_high_low = case_when(
     perf_read > 0 ~ "High performing",
     perf_read < 0 ~ "Low performing",
     perf_read == 0 ~ "Other"
   )) %>%
-  left_join(df_sch_avg %>% 
+  left_join(sch_avg_by_cohort %>% 
               filter(chrt_ninth == 2010) %>% 
               mutate(first_hs_code = factor(first_hs_code))) %>% 
   drop_na(perf_read_high_low) %>% 
