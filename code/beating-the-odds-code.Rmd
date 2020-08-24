@@ -327,15 +327,15 @@ bto_read <- calc_bto(resids_read) %>%
 # Merge datasets for plotting
 
 # Merge BTO datasets
-bto_read_math <- left_join(bto_read, bto_math, by = "first_hs_code") %>% 
-  # Convert high school work to numeric for merge
-  mutate(first_hs_code = as.numeric(first_hs_code))
+bto_read_math <- left_join(bto_read, bto_math, by = "first_hs_code")
 
 # Pull school and district info from original dataset
 df_names <- faketucky %>%
   select(first_dist_code, first_hs_code, first_dist_name, first_hs_name) %>%
-  distinct()
-
+  distinct() %>% 
+  # Convert high school work to factor for merge
+  mutate(first_hs_code = factor(first_hs_code))
+  
 # Merge BTO and school info datasets
 df_bto <- left_join(df_names, bto_read_math, by = "first_hs_code")
 ```
