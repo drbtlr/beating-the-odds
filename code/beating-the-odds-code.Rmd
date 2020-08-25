@@ -2,17 +2,20 @@
 title: "Beating the Odds"
 author: "Aaron Butler & Hannah Poquette"
 date: "June 2, 2020"
-output: 
+output:
   html_document:
     theme: simplex
     css: ../includes/styles.css
-    highlight: NULL
-    keep_md: true
-    toc: true
+    highlight: null
+    keep_md: yes
+    toc: yes
     toc_depth: 3
-    toc_float: true
-    number_sections: false
-editor_options: 
+    toc_float: yes
+    number_sections: no
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+editor_options:
   chunk_output_type: console
 ---
 
@@ -605,7 +608,7 @@ df_plot <- bind_rows(tmp_ma, tmp_rd) %>% drop_na()
 
 #### Step 3: Plot
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, fig.height=8}
 # Plot
 df_plot %>% 
   mutate(perf = case_when(
@@ -623,9 +626,12 @@ df_plot %>%
     "Small\nnegative\ndecrease", "No\nsignificant\ndecrease", 
     "Small\npositive\nincrease", "Medium\npositive\nincrease", 
     "Large\npositive\nincrease")) %>%
-  ggplot(aes(factor(perf), avg_prank, fill=subject)) +
-  geom_boxplot() +
-  scale_fill_manual(values = c("#E69F00", "#999999")) +
+  filter(perf != "No\nsignificant\ndecrease") %>%
+  ggplot(aes(factor(perf), avg_prank)) +
+  #geom_boxplot(aes(fill=subject)) +
+  geom_jitter(aes(color=subject), width = 0.3, alpha = 0.55)+
+  ylim(0,100)+
+  scale_color_manual(values = c("#E69F00", "#999999")) +
   theme_minimal() +
   theme(panel.grid = element_blank(),
         plot.title = element_text(size = 16, face = "bold"),
@@ -633,7 +639,8 @@ df_plot %>%
         axis.text = element_text(size = 11),
         legend.position = "top") +
   labs(x = "Performance Level", y = "Percentile Rank", fill = "",
-       title = "Prior Performance by Beating-the-Odds Performance Categories")
+       title = "Prior Performance by Beating-the-Odds Performance Categories")+
+  facet_wrap(~ subject, ncol = 1)
 ```
 
 ### BTO schools by student demographics
