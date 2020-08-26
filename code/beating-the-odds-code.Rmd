@@ -12,11 +12,6 @@ output:
     toc_depth: 3
     toc_float: yes
     number_sections: no
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
-editor_options:
-  chunk_output_type: console
 ---
 
 # Implementing a Beating-the-Odds Analysis 
