@@ -664,72 +664,55 @@ df_plot %>%
 
 **Analytic Technique:** Calculate the percentage of white (or minority) students, low income students, and special education students for schools in each performance level. 
 
-```{r bto-demos, echo=TRUE}
-# Create temp datasets for plotting
-grp_all <- sch_avg_by_cohort %>% 
-  filter(chrt_ninth == 2010) %>% 
-  summarise(prop_white = mean(sch_white, na.rm = TRUE),
-            prop_frpl = mean(sch_frpl, na.rm = TRUE),
-            prop_sped = mean(sch_sped, na.rm = TRUE),
-            prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
-  mutate(group = "All students") %>% 
-  pivot_longer(-group)
+#### Step 1: Calculate the proportion of students by performance level
 
-grp_math <- bto_cuts %>%
-  mutate(perf_math_high_low = case_when(
-    perf_math > 0 ~ "High performing",
-    perf_math < 0 ~ "Low performing",
-    perf_math == 0 ~ "Other"
+```{r bto-demos-data, echo=TRUE}
+# Create dataset for plotting
+for_demo_plot <- bto_cuts %>%
+  # Label BTO schools
+  mutate(perf_high_low = case_when(
+    perf_math > 0 ~ "Math_High Performing",
+    perf_math < 0 ~ "Math_Low Performing",
+    perf_read > 0 ~ "Read_High Performing",
+    perf_read < 0 ~ "Read_Low Performing",
+    TRUE ~ NA_character_
   )) %>%
+  # Merge with school demographics
   left_join(sch_avg_by_cohort %>% 
               filter(chrt_ninth == 2010) %>% 
               mutate(first_hs_code = factor(first_hs_code))) %>% 
-  drop_na(perf_math_high_low) %>% 
-  group_by(perf_math_high_low) %>% 
+  drop_na(perf_high_low) %>% 
+  # Calculate proportions by performance level
+  group_by(perf_high_low) %>% 
   summarise(prop_white = mean(sch_white, na.rm = TRUE),
             prop_frpl = mean(sch_frpl, na.rm = TRUE),
             prop_sped = mean(sch_sped, na.rm = TRUE),
             prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
+  # Convert to long format for plotting
   pivot_longer(cols = starts_with("prop")) %>% 
-  rename(group = perf_math_high_low)
+  rename(group = perf_high_low)
+```
 
-grp_read <- bto_cuts %>%
-  mutate(perf_read_high_low = case_when(
-    perf_read > 0 ~ "High performing",
-    perf_read < 0 ~ "Low performing",
-    perf_read == 0 ~ "Other"
-  )) %>%
-  left_join(sch_avg_by_cohort %>% 
-              filter(chrt_ninth == 2010) %>% 
-              mutate(first_hs_code = factor(first_hs_code))) %>% 
-  drop_na(perf_read_high_low) %>% 
-  group_by(perf_read_high_low) %>% 
-  summarise(prop_white = mean(sch_white, na.rm = TRUE),
-            prop_frpl = mean(sch_frpl, na.rm = TRUE),
-            prop_sped = mean(sch_sped, na.rm = TRUE),
-            prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
-  pivot_longer(cols = starts_with("prop")) %>% 
-  rename(group = perf_read_high_low) 
+#### Step 2: Plot school demographics by performance level
 
-# Plot Math
-bind_rows(grp_all, grp_math) %>% 
-  # Recode variables for plotting
-  mutate(group = fct_relevel(
-    group, "All students", "High performing","Low performing", "Other"
-    )) %>% 
+```{r bto-demo-plot, echo=TRUE}
+for_demo_plot %>%
+  separate(group, into = c("subject", "group"), sep = "_") %>% 
+  mutate(group = fct_relevel(group, "Low Performing", "High Performing")) %>% 
   mutate(value = round(value * 100, 1)) %>% 
   mutate(name = case_when(
     name == "prop_white" ~ "White",
     name == "prop_frpl" ~ "Low Income",
     name == "prop_sped" ~ "Special Education",
     name == "prop_lep" ~ "Limited English"
-  )) %>% 
+  )) %>%
   ggplot(aes(name, value, fill = group)) +
   geom_col(position = position_dodge(.85), width = .8) +
   geom_text(aes(label = round(value, 1)),
             position = position_dodge(.85), vjust = -.45) +
   expand_limits(y = c(0, 100)) +
-  scale_fill_manual(values = c("#999999", "#E69F00", "#56B4E9", "#009E73")) +
+  facet_wrap(~ subject, nrow = 2) +
+  scale_fill_manual(values = c("#9E002A", "#009E73")) +
   theme_minimal() +
   theme(panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
@@ -740,43 +723,23 @@ bind_rows(grp_all, grp_math) %>%
         axis.title.y = element_text(size = 12),
         axis.text = element_text(size = 11),
         legend.position = "top",
-        legend.text = element_text(size = 11)) +
+        legend.text = element_text(size = 11),
+        strip.text = element_text(size = 11, face = "bold"),
+        strip.background = element_rect(fill = "gray80", color = "gray80")) +
   labs(x = "", y = "Percent of Students", fill = "",
-       title = "School Demographics by Performance Status in Math")
-
-# Plot Reading
-bind_rows(grp_all, grp_read) %>% 
-  mutate(group = fct_relevel(
-    group, "All students", "High performing","Low performing", "Other"
-  )) %>% 
-  mutate(value = round(value * 100, 1)) %>% 
-  mutate(name = case_when(
-    name == "prop_white" ~ "White",
-    name == "prop_frpl" ~ "Low Income",
-    name == "prop_sped" ~ "Special Education",
-    name == "prop_lep" ~ "Limited English"
-  )) %>% 
-  ggplot(aes(name, value, fill = group)) +
-  geom_col(position = position_dodge(.85), width = .8) +
-  geom_text(aes(label = round(value, 1)),
-            position = position_dodge(.85), vjust = -.45) +
-  expand_limits(y = c(0, 100)) +
-  scale_fill_manual(values = c("#999999", "#E69F00", "#56B4E9", "#009E73")) +
-  theme_minimal() +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        plot.title = element_text(size = 16, face = "bold"),
-        plot.title.position = "plot",
-        plot.subtitle = element_text(size = 14),
-        axis.title.x = element_blank(),
-        axis.title.y = element_text(size = 12),
-        axis.text = element_text(size = 11),
-        legend.position = "top",
-        legend.text = element_text(size = 11)) +
-  labs(x = "", y = "Percent of Students", fill = "",
-       title = "School Demographics by Performance Status in Reading")
+       title = "School Demographics by Performance Status in Math and Reading")
 ```
 
 ---
 
 ##### *This guide was originally created by [Aaron Butler](https://www.aaronjbutler.com/) and Hannah Poquette in partnership with the Strategic Data Project.*
+
+
+
+
+
+
+
+
+
+
