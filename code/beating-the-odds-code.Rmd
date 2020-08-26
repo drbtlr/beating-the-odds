@@ -588,7 +588,7 @@ df_avg_prior_ach <- faketucky %>%
          avg_8_math_prank = rank(avg_8_math)/length(avg_8_math)*100)
 ```
 
-#### Step 2: Create temp datasets for plotting
+#### Step 2: Create temporary datasets for plotting
 
 As a workaround, create separate datasets for math and reading then append datasets for plotting.
 
@@ -605,7 +605,7 @@ tmp_rd <- left_join(bto_cuts, df_avg_prior_ach%>% mutate(first_hs_code = factor(
 df_plot <- bind_rows(tmp_ma, tmp_rd) %>% drop_na()
 ```
 
-#### Step 3: Plot
+#### Step 3: Plot prior performance
 
 ```{r, echo=TRUE, fig.height=8}
 # Plot
