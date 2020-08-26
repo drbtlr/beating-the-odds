@@ -355,6 +355,7 @@ sch_bto_data %>%
   scale_color_manual(values = c("#999999", "#E69F00")) +
   theme_minimal() +
   theme(plot.title = element_text(size = 16, face = "bold"),
+        plot.title.position = "plot",
         plot.subtitle = element_text(size = 14),
         axis.title = element_text(size = 12),
         axis.text = element_text(size = 11),
@@ -401,6 +402,7 @@ sch_bto_data %>%
   scale_fill_manual(values = c("#999999", "#E69F00")) +
   theme_minimal() +
   theme(plot.title = element_text(size = 16, face = "bold"),
+        plot.title.position = "plot",
         plot.subtitle = element_text(size = 14),
         axis.title = element_text(size = 12),
         axis.text = element_text(size = 11),
@@ -481,6 +483,7 @@ bind_rows(bto_cuts_math, bto_cuts_read) %>%
   theme(panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
         plot.title = element_text(size = 16, face = "bold"),
+        plot.title.position = "plot",
         plot.subtitle = element_text(size = 14),
         axis.title.y = element_text(size = 12),
         axis.title.x = element_blank(),
@@ -537,6 +540,7 @@ bto_cuts %>%
   theme_minimal() +
   theme(panel.grid = element_blank(),
         plot.title = element_text(size = 16, face = "bold"),
+        plot.title.position = "plot",
         plot.subtitle = element_text(size = 14),
         axis.title = element_text(size = 12),
         axis.text = element_text(size = 11)) +
@@ -630,6 +634,7 @@ df_plot %>%
   theme_minimal() +
   theme(panel.grid = element_blank(),
         plot.title = element_text(size = 16, face = "bold"),
+        plot.title.position = "plot",
         axis.title = element_text(size = 12),
         axis.text = element_text(size = 11),
         legend.position = "top") +
@@ -729,6 +734,7 @@ bind_rows(grp_all, grp_math) %>%
   theme(panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
         plot.title = element_text(size = 16, face = "bold"),
+        plot.title.position = "plot",
         plot.subtitle = element_text(size = 14),
         axis.title.x = element_blank(),
         axis.title.y = element_text(size = 12),
@@ -760,6 +766,7 @@ bind_rows(grp_all, grp_read) %>%
   theme(panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
         plot.title = element_text(size = 16, face = "bold"),
+        plot.title.position = "plot",
         plot.subtitle = element_text(size = 14),
         axis.title.x = element_blank(),
         axis.title.y = element_text(size = 12),
