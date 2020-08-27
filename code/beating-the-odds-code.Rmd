@@ -442,7 +442,9 @@ bto_cuts <- sch_bto_data %>%
   ))
 ```
 
-#### Step 3: Plot performance levels
+#### Step 3: Create temporary datasets for plotting
+
+As a workaround, create separate datasets for math and reading then append datasets for plotting.
 
 ```{r plot-perf-lvl, echo=TRUE}
 # Create temp datasets for plotting
@@ -456,8 +458,11 @@ bto_cuts_read <- bto_cuts %>%
   mutate(subject = "Reading") %>% 
   select(subject, cut = perf_read, n)
 
-# Plot
-bind_rows(bto_cuts_math, bto_cuts_read) %>% 
+# Merge temp datasets
+bto_cuts_math_read <- bind_rows(bto_cuts_math, bto_cuts_read)
+
+# Create variables for plotting
+bto_cuts_math_read_labeled <- bto_cuts_math_read %>% 
   mutate(cut = case_when(
     cut == -3 ~ "Large\nnegative\ndecrease",
     cut == -2 ~ "Medium\nnegative\ndecrease",
@@ -473,8 +478,14 @@ bind_rows(bto_cuts_math, bto_cuts_read) %>%
     "Small\nnegative\ndecrease", "No\nsignificant\ndecrease", 
     "Small\npositive\nincrease", "Medium\npositive\nincrease", 
     "Large\npositive\nincrease")) %>% 
-  filter(!is.na(cut)) %>% 
-  ggplot(aes(cut, n, fill = subject)) +
+  filter(!is.na(cut))
+```
+
+#### Step 4: Plot performance levels
+
+```{r}
+# Plot performance levels
+ggplot(bto_cuts_math_read_labeled, aes(cut, n, fill = subject)) +
   geom_col(position = position_dodge(.85), width = .8) +
   geom_text(aes(label = n),
             position = position_dodge(.85), vjust = -.45) +
@@ -493,7 +504,7 @@ bind_rows(bto_cuts_math, bto_cuts_read) %>%
        title = "Distribution of Beating-the-Odds Schools in Math and Reading") 
 ```
 
-#### Step 4: Count number of schools by performance levels
+#### Step 5: Count number of schools by performance levels
 
 Creating tables or plots that compare school performance levels in math and reading allows us to see whether schools perform better or worse in one or two subject areas. In this example, we see that school performance in math and reading are correlated. This information can be used to inform the way we think about best practices.
 
@@ -537,7 +548,7 @@ num_perf_level <- bto_cuts %>%
   count(perf_math, perf_read)
 ```
 
-#### Step 5: Create a table of schools by performance levels
+#### Step 6: Create a table of schools by performance levels
 
 ```{r bto-cuts-table, echo=TRUE}
 # Plot a table
@@ -596,8 +607,6 @@ df_avg_prior_ach <- faketucky %>%
 ```
 
 #### Step 2: Create temporary datasets for plotting
-
-As a workaround, create separate datasets for math and reading then append datasets for plotting.
 
 ```{r bto-prior-perf-plot, echo=TRUE}
 # Create temp datasets for math and read
