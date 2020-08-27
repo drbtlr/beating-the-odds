@@ -346,7 +346,7 @@ It's always helpful to plot the results of your analysis. We've found a nice sca
 # Create scatter plot math/read residuals
 sch_bto_data %>% 
   mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes",
-                          "Performed Better/Worse than Expected", "Performed As Expected")) %>%
+                          "Performed Better/Worse than Expected", "Performed as Expected")) %>%
   filter(!is.na(bto_both)) %>%
   ggplot(aes(resid_math, resid_read, color = bto_both)) +
   geom_point(size = 2, alpha = .6) +
@@ -396,14 +396,14 @@ We examined the distribution of BTO schools as one example of how to determine p
 ```{r bto-cuts-plot, echo=TRUE}
 # Determine performance levels
 sch_bto_data %>% 
-  mutate(bto_math = ifelse(bto_math == "yes", "Yes", "No")) %>%
+  mutate(bto_math = ifelse(bto_math == "yes", 
+                           "Performed Better/Worse than Expected", "Performed as Expected")) %>%
   ggplot(aes(resid_math)) +
   geom_histogram(aes(fill = bto_math), alpha = .8) +
   scale_fill_manual(values = c("#999999", "#E69F00")) +
   theme_minimal() +
   theme(plot.title = element_text(size = 16, face = "bold"),
         plot.title.position = "plot",
-        plot.subtitle = element_text(size = 14),
         axis.title = element_text(size = 12),
         axis.text = element_text(size = 11),
         legend.position = "top",
@@ -442,7 +442,7 @@ bto_cuts <- sch_bto_data %>%
   ))
 ```
 
-#### Step 3: Plot
+#### Step 3: Plot performance levels
 
 ```{r plot-perf-lvl, echo=TRUE}
 # Create temp datasets for plotting
@@ -484,7 +484,6 @@ bind_rows(bto_cuts_math, bto_cuts_read) %>%
         panel.grid.minor.y = element_blank(),
         plot.title = element_text(size = 16, face = "bold"),
         plot.title.position = "plot",
-        plot.subtitle = element_text(size = 14),
         axis.title.y = element_text(size = 12),
         axis.title.x = element_blank(),
         axis.text = element_text(size = 11),
@@ -494,11 +493,13 @@ bind_rows(bto_cuts_math, bto_cuts_read) %>%
        title = "Distribution of Beating-the-Odds Schools in Math and Reading") 
 ```
 
+#### Step 4: Count number of schools by performance levels
+
 Creating tables or plots that compare school performance levels in math and reading allows us to see whether schools perform better or worse in one or two subject areas. In this example, we see that school performance in math and reading are correlated. This information can be used to inform the way we think about best practices.
 
-```{r bto-cuts-table, echo=TRUE}
-# Plot table
-bto_cuts %>%
+```{r bto-cuts-counts, echo=TRUE}
+# Count schools by performance level
+num_perf_level <- bto_cuts %>%
   # Recode variable for plotting
   mutate(perf_math = case_when(
     perf_math == -3 ~ "Large\nnegative\ndecrease",
@@ -533,8 +534,14 @@ bto_cuts %>%
   # Drop missing values for plotting
   drop_na(perf_math, perf_read) %>%
   # Count number of schools by performance levels
-  count(perf_math, perf_read) %>%
-  ggplot(aes(perf_math, perf_read)) +
+  count(perf_math, perf_read)
+```
+
+#### Step 5: Create a table of schools by performance levels
+
+```{r bto-cuts-table, echo=TRUE}
+# Plot a table
+ggplot(num_perf_level, aes(perf_math, perf_read)) +
   geom_tile(fill = "white") +
   geom_text(aes(label = n)) +
   theme_minimal() +
@@ -593,23 +600,25 @@ df_avg_prior_ach <- faketucky %>%
 As a workaround, create separate datasets for math and reading then append datasets for plotting.
 
 ```{r bto-prior-perf-plot, echo=TRUE}
-# Step 2: Create temp datasets for plotting
-tmp_ma <- left_join(bto_cuts, df_avg_prior_ach %>% mutate(first_hs_code = factor(first_hs_code))) %>% 
+# Create temp datasets for math and read
+prior_perf_math <- left_join(bto_cuts, 
+                             df_avg_prior_ach %>% 
+                               mutate(first_hs_code = factor(first_hs_code))) %>% 
   select(perf = perf_math, avg_prank = avg_8_math_prank) %>% 
   mutate(subject = "Math")
 
-tmp_rd <- left_join(bto_cuts, df_avg_prior_ach%>% mutate(first_hs_code = factor(first_hs_code))) %>% 
+prior_perf_read <- left_join(bto_cuts, 
+                             df_avg_prior_ach %>% 
+                               mutate(first_hs_code = factor(first_hs_code))) %>% 
   select(perf = perf_read, avg_prank = avg_8_read_prank) %>% 
   mutate(subject = "Reading")
 
-df_plot <- bind_rows(tmp_ma, tmp_rd) %>% drop_na()
-```
+# Merge temp datasets
+prior_perf <- bind_rows(prior_perf_math, prior_perf_read) %>% 
+  drop_na()
 
-#### Step 3: Plot prior performance
-
-```{r, echo=TRUE, fig.height=8}
-# Plot
-df_plot %>% 
+# Create variables for plotting
+prio_perf_labeled <- prior_perf %>% 
   mutate(perf = case_when(
     perf == -3 ~ "Large\nnegative\ndecrease",
     perf == -2 ~ "Medium\nnegative\ndecrease",
@@ -625,10 +634,14 @@ df_plot %>%
     "Small\nnegative\ndecrease", "No\nsignificant\ndecrease", 
     "Small\npositive\nincrease", "Medium\npositive\nincrease", 
     "Large\npositive\nincrease")) %>%
-  filter(perf != "No\nsignificant\ndecrease") %>%
-  ggplot(aes(factor(perf), avg_prank)) +
-  #geom_boxplot(aes(fill=subject)) +
-  geom_jitter(aes(color=subject), width = 0.3, alpha = 0.55)+
+  filter(perf != "No\nsignificant\ndecrease")
+```
+
+#### Step 3: Plot prior performance
+
+```{r, echo=TRUE, fig.height=8}
+ggplot(prio_perf_labeled, aes(factor(perf), avg_prank)) +
+  geom_jitter(aes(color = subject), size = 3, width = 0.3, alpha = 0.55)+
   ylim(0,100)+
   scale_color_manual(values = c("#E69F00", "#999999")) +
   theme_minimal() +
@@ -637,8 +650,10 @@ df_plot %>%
         plot.title.position = "plot",
         axis.title = element_text(size = 12),
         axis.text = element_text(size = 11),
-        legend.position = "top") +
-  labs(x = "Performance Level", y = "Percentile Rank", fill = "",
+        legend.position = "none",
+        strip.text = element_text(size = 11, face = "bold"),
+        strip.background = element_rect(fill = "gray80", color = "gray80")) +
+  labs(x = "Performance Level", y = "Percentile Rank", color = "",
        title = "Prior Performance by Beating-the-Odds Performance Categories")+
   facet_wrap(~ subject, ncol = 1)
 ```
