@@ -160,7 +160,7 @@ This beating-the-odds analysis uses a multilevel framework that incorporates sch
 
 *Note:* We recognize that grand-mean centering may not be an appropriate option for your analysis. We encourage you to explore other centering techniques for multilevel modeling. Gelman and Hill's [Data Analysis Using Regression and Multilevel/Hierarchical Models](http://www.stat.columbia.edu/~gelman/arm/) and Raudenbush and Bryk's [Hierarchical Linear Models](https://us.sagepub.com/en-us/nam/hierarchical-linear-models/book9230) provide further details on the different centering techniques as well as the advantages and disadvantages of their use in multilevel modeling. 
 
-#### Step 1.1: Calculate school averages by cohort year
+#### Calculate school averages by cohort year
 
 ```{r calc-avgs, echo=TRUE}
 # Calculate school averages by cohort year
@@ -182,7 +182,7 @@ sch_avg_by_cohort <- faketucky %>%
   ungroup()
 ```
 
-#### Step 1.2: Center variables around grand mean
+#### Center variables around grand mean
 
 ```{r center-vars, echo=TRUE}
 # Calculate across-year cohort averages
@@ -281,7 +281,7 @@ formula:
 
 Confidence intervals allowed us to determine whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero and if the residual was positive. Conversely, schools were identified as performing worse than expected if the 95 percent confidence interval did not include zero and if the residual was negative. Schools that performed as expected were those with confidence intervals that included zero.
 
-#### Step 4.1: Access school-level residuals
+#### Access school-level residuals
 
 ```{r pull-resids, echo=TRUE}
 # Access school-level residuals
@@ -289,7 +289,7 @@ resids_math <- ranef(m_math)
 resids_read <- ranef(m_read)
 ```
 
-#### Step 4.2: Create function to flag BTO schools
+#### Create function to flag BTO schools
 
 ```{r calc-bto, echo=TRUE}
 # Create function to flag BTO schools 
@@ -308,7 +308,7 @@ calc_bto <- function(.resids) {
 }
 ```
 
-#### Step 4.3: Execute function for each subject area
+#### Execute function for each subject area
 
 ```{r execute, echo=TRUE}
 # Execute function for each subject area
@@ -321,7 +321,7 @@ bto_read <- calc_bto(resids_read) %>%
   select(first_hs_code = grp, resid_read = condval, bto_read = sig)
 ```
 
-#### Step 4.4: Merge datasets for plotting
+#### Merge datasets for plotting
 
 ```{r merge, echo=TRUE}
 # Merge BTO datasets
