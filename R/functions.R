@@ -1,7 +1,20 @@
-# Packages
-library(tidyverse)
+# Custom ggplot2 theme for BTO guide
+bto_theme <- function() {
+  theme_minimal() +
+    theme(
+      panel.grid = element_blank(),
+      plot.title = element_text(size = 16, face = "bold"),
+      plot.title.position = "plot",
+      plot.subtitle = element_text(size = 14),
+      axis.title = element_text(size = 12),
+      axis.text = element_text(size = 11),
+      legend.position = "top",
+      legend.text = element_text(size = 11),
+      strip.text = element_text(size = 11, face = "bold"),
+      strip.background = element_rect(fill = "gray80", color = "gray80")
+    )
+}
 
-# R Function for Task 1
 # Derive the mode in a stata friendly fashion
 statamode <- function(x) {
   z <- table(as.vector(x))
