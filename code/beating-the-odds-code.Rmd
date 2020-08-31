@@ -389,7 +389,7 @@ sch_bto_data %>%
 
 **Analytic Technique:** Identify school performance levels by subtracting each school's predicted achievement from its actual achievement and determining reasonable cut points for performance categories (such as small, medium, or large). Count the number of schools by performance level and plot a matrix to compare school performance across subject areas.  
 
-#### Step 1: Determine performance levels
+#### Determine performance levels
 
 We examined the distribution of BTO schools as one example of how to determine performance levels. We recognize that there are a number of other ways to establish performance levels. Examples include referencing academic literature, technical documents, pilot studies, statistical analyses, etc.
 
@@ -412,7 +412,7 @@ sch_bto_data %>%
        title = "Distribution of Beating-the-Odds Schools in Math") 
 ```
 
-#### Step 2: Set performance levels
+#### Set performance levels
 
 ```{r set-perf-lvl, echo=TRUE}
 # Set performance levels
@@ -442,7 +442,7 @@ bto_cuts <- sch_bto_data %>%
   ))
 ```
 
-#### Step 3: Create temporary datasets for plotting
+#### Create temporary datasets for plotting
 
 As a workaround, create separate datasets for math and reading then append datasets for plotting.
 
@@ -481,7 +481,7 @@ bto_cuts_math_read_labeled <- bto_cuts_math_read %>%
   filter(!is.na(cut))
 ```
 
-#### Step 4: Plot performance levels
+#### Plot performance levels
 
 ```{r}
 # Plot performance levels
@@ -504,7 +504,7 @@ ggplot(bto_cuts_math_read_labeled, aes(cut, n, fill = subject)) +
        title = "Distribution of Beating-the-Odds Schools in Math and Reading") 
 ```
 
-#### Step 5: Count number of schools by performance levels
+#### Count number of schools by performance levels
 
 Creating tables or plots that compare school performance levels in math and reading allows us to see whether schools perform better or worse in one or two subject areas. In this example, we see that school performance in math and reading are correlated. This information can be used to inform the way we think about best practices.
 
@@ -548,7 +548,7 @@ num_perf_level <- bto_cuts %>%
   count(perf_math, perf_read)
 ```
 
-#### Step 6: Create a table of schools by performance levels
+#### Create a table of schools by performance levels
 
 ```{r bto-cuts-table, echo=TRUE}
 # Plot a table
@@ -588,7 +588,7 @@ ggplot(num_perf_level, aes(perf_math, perf_read)) +
 
 **Analytic Technique:** Calculate the average prior achievement for each school in the BTO analysis then rank schools by their score.
 
-#### Step 1: Calculate average prior achievement for each school
+#### Calculate average prior achievement for each school
 
 ```{r calc-bto-prior-perf, echo=TRUE}
 # Calculate average prior achievement for each school
@@ -606,7 +606,7 @@ df_avg_prior_ach <- faketucky %>%
          avg_8_math_prank = rank(avg_8_math)/length(avg_8_math)*100)
 ```
 
-#### Step 2: Create temporary datasets for plotting
+#### Create temporary datasets for plotting
 
 ```{r bto-prior-perf-plot, echo=TRUE}
 # Create temp datasets for math and read
@@ -646,7 +646,7 @@ prio_perf_labeled <- prior_perf %>%
   filter(perf != "No\nsignificant\ndecrease")
 ```
 
-#### Step 3: Plot prior performance
+#### Plot prior performance
 
 ```{r, echo=TRUE, fig.height=8}
 ggplot(prio_perf_labeled, aes(factor(perf), avg_prank)) +
@@ -688,7 +688,7 @@ ggplot(prio_perf_labeled, aes(factor(perf), avg_prank)) +
 
 **Analytic Technique:** Calculate the percentage of white (or minority) students, low income students, and special education students for schools in each performance level. 
 
-#### Step 1: Calculate the proportion of students by performance level
+#### Calculate the proportion of students by performance level
 
 ```{r bto-demos-data, echo=TRUE}
 # Create dataset for plotting
@@ -717,7 +717,7 @@ for_demo_plot <- bto_cuts %>%
   rename(group = perf_high_low)
 ```
 
-#### Step 2: Plot school demographics by performance level
+#### Plot school demographics by performance level
 
 ```{r bto-demo-plot, echo=TRUE}
 for_demo_plot %>%
