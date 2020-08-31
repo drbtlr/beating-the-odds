@@ -67,12 +67,17 @@ To install packages, such as `lme4`, run the following command in the R console:
 
 `install.packages("lme4")`
 
+In addition, this guide will draw from OpenSDP-written functions defined in the `functions.R` document, which is located in the `R` folder of this guide’s GitHub repository. Please make sure to have downloaded the entire GitHub repository to run this code.
+
 After installing your R packages and downloaded this guide's GitHub repository, run the chunk of code below to load them onto your computer.
 
 ```{r load-packages, echo=TRUE}
 # Load packages
 library(tidyverse)
 library(lme4)
+
+# Read in some R functions that are convenience wrappers
+source("../R/functions.R")
 ```
 
 ### About the Data
