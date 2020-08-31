@@ -358,14 +358,8 @@ sch_bto_data %>%
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_color_manual(values = c("#999999", "#E69F00")) +
-  theme_minimal() +
-  theme(plot.title = element_text(size = 16, face = "bold"),
-        plot.title.position = "plot",
-        plot.subtitle = element_text(size = 14),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 11),
-        legend.position = "top",
-        legend.text = element_text(size = 11)) +
+  bto_theme() +
+  theme(panel.grid = element_line(color = "grey92")) +
   labs(x = "Math (actual - predicted)",
        y = "Reading (actual - predicted)",
        color = "",
@@ -406,13 +400,8 @@ sch_bto_data %>%
   ggplot(aes(resid_math)) +
   geom_histogram(aes(fill = bto_math), alpha = .8) +
   scale_fill_manual(values = c("#999999", "#E69F00")) +
-  theme_minimal() +
-  theme(plot.title = element_text(size = 16, face = "bold"),
-        plot.title.position = "plot",
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 11),
-        legend.position = "top",
-        legend.text = element_text(size = 11)) +
+  bto_theme() +
+  theme(panel.grid = element_line(color = "grey92")) +
   labs(x = "Math (actual - predicted)", y = "Number of Schools", fill = "",
        title = "Distribution of Beating-the-Odds Schools in Math") 
 ```
@@ -495,16 +484,8 @@ ggplot(bto_cuts_math_read_labeled, aes(cut, n, fill = subject)) +
   geom_text(aes(label = n),
             position = position_dodge(.85), vjust = -.45) +
   scale_fill_manual(values = c("#E69F00", "#999999")) +
-  theme_minimal() +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        plot.title = element_text(size = 16, face = "bold"),
-        plot.title.position = "plot",
-        axis.title.y = element_text(size = 12),
-        axis.title.x = element_blank(),
-        axis.text = element_text(size = 11),
-        legend.position = "top",
-        legend.text = element_text(size = 11)) +
+  bto_theme() +
+  theme(panel.grid.major.y = element_line(color = "grey92")) +
   labs(x = "", y = "Number of Schools", fill = "",
        title = "Distribution of Beating-the-Odds Schools in Math and Reading") 
 ```
@@ -560,13 +541,7 @@ num_perf_level <- bto_cuts %>%
 ggplot(num_perf_level, aes(perf_math, perf_read)) +
   geom_tile(fill = "white") +
   geom_text(aes(label = n)) +
-  theme_minimal() +
-  theme(panel.grid = element_blank(),
-        plot.title = element_text(size = 16, face = "bold"),
-        plot.title.position = "plot",
-        plot.subtitle = element_text(size = 14),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 11)) +
+  bto_theme() +
   labs(x = "Math Performance", y = "Reading Performance",
        title = "School Counts by Performance Categories for Math and Reading")
 ```
@@ -655,21 +630,14 @@ prio_perf_labeled <- prior_perf %>%
 
 ```{r, echo=TRUE, fig.height=8}
 ggplot(prio_perf_labeled, aes(factor(perf), avg_prank)) +
-  geom_jitter(aes(color = subject), size = 3, width = 0.3, alpha = 0.55)+
-  ylim(0,100)+
+  geom_jitter(aes(color = subject), size = 3, width = 0.3, alpha = 0.55) +
+  ylim(0,100) +
+  facet_wrap(~ subject, ncol = 1) +
   scale_color_manual(values = c("#E69F00", "#999999")) +
-  theme_minimal() +
-  theme(panel.grid = element_blank(),
-        plot.title = element_text(size = 16, face = "bold"),
-        plot.title.position = "plot",
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 11),
-        legend.position = "none",
-        strip.text = element_text(size = 11, face = "bold"),
-        strip.background = element_rect(fill = "gray80", color = "gray80")) +
+  bto_theme() +
+  theme(legend.position = "none") +
   labs(x = "Performance Level", y = "Percentile Rank", color = "",
-       title = "Prior Performance by Beating-the-Odds Performance Categories")+
-  facet_wrap(~ subject, ncol = 1)
+       title = "Prior Performance by Beating-the-Odds Performance Categories")
 ```
 
 ### BTO schools by student demographics
@@ -742,19 +710,8 @@ for_demo_plot %>%
   expand_limits(y = c(0, 100)) +
   facet_wrap(~ subject, nrow = 2) +
   scale_fill_manual(values = c("#9E002A", "#009E73")) +
-  theme_minimal() +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        plot.title = element_text(size = 16, face = "bold"),
-        plot.title.position = "plot",
-        plot.subtitle = element_text(size = 14),
-        axis.title.x = element_blank(),
-        axis.title.y = element_text(size = 12),
-        axis.text = element_text(size = 11),
-        legend.position = "top",
-        legend.text = element_text(size = 11),
-        strip.text = element_text(size = 11, face = "bold"),
-        strip.background = element_rect(fill = "gray80", color = "gray80")) +
+  bto_theme() +
+  theme(panel.grid.major.y = element_line(color = "grey92")) +
   labs(x = "", y = "Percent of Students", fill = "",
        title = "School Demographics by Performance Status in Math and Reading")
 ```
