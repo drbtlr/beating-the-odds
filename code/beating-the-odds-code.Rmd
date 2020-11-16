@@ -273,6 +273,16 @@ summary(m_math)
 #summary(m_read)
 ```
 
+Visual diagnostic plots are another way to inspect the quality of your model. Using a helpful plotting function found in the [merTools package](https://cran.r-project.org/web/packages/merTools/index.html), we plot the results of a simulation of random effects for each model. Look for variation and confidence bands (dark bars) that do now overlap the red line for zero. Here, we established that a number of school effects are meaningfully from zero.
+
+```{r plot-RE, echo=TRUE}
+# Plot random effects for the math model
+plotREsim(REsim(m_math, n.sims = 100), stat = "median", sd = TRUE)
+
+# Remove comment (#) below to plot random effects for the reading model
+#plotREsim(REsim(m_read, n.sims = 100), stat = "median", sd = TRUE)
+```
+
 #### Step 4: Calculate statistics for beating-the-odds schools
 
 We used the model residuals to identify three groups of schools:
