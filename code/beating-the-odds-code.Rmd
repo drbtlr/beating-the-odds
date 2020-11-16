@@ -263,10 +263,14 @@ Examine the coefficients and standard errors for each variable. Ask yourself if 
 
 For information on other model checking and sensitivity analysis for multilevel models, see Snijders and Berkhof's chapter on [Diagnostic Checks for Multilevel Models](https://www.stats.ox.ac.uk/~snijders/handbook_ml_ch3.pdf).
 
+Below we printed a summary of the math model for illustrative purposes.
+
 ```{r inspect-fit, echo=TRUE}
-# Call model summary statistics
+# Call summary statistics for the math model 
 summary(m_math)
-summary(m_read)
+
+# Remove the comment (#) below to print a summary of the reading model 
+#summary(m_read)
 ```
 
 #### Step 4: Calculate statistics for beating-the-odds schools
