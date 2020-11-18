@@ -303,30 +303,28 @@ formula:
 
 Confidence intervals allowed us to determine whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero and if the residual was positive. Conversely, schools were identified as performing worse than expected if the 95 percent confidence interval did not include zero and if the residual was negative. Schools that performed as expected were those with confidence intervals that included zero.
 
-#### Access school-level residuals
+#### Calculate school-level expected ranks
 
 ```{r pull-resids, echo=TRUE}
-# Access school-level residuals
-resids_math <- ranef(m_math)
-resids_read <- ranef(m_read)
+ranks_math <- merTools::expectedRank(m_math, groupFctr = "first_hs_code")
+ranks_read <- merTools::expectedRank(m_read, groupFctr = "first_hs_code")
 ```
 
 #### Create function to flag BTO schools
 
 ```{r calc-bto, echo=TRUE}
-# Create function to flag BTO schools 
-calc_bto <- function(.resids) {
-  # Input model residuals
-  .resids %>%
-    # Store as a dataframe
-    data.frame() %>% 
-    # Set benchmark at +2 standard deviations
-    mutate(pos_bench = condsd * 1.96,
-           neg_bench = condsd * -1.96) %>% 
+calc_bto <- function(.ranks) {
+  # Input model expected ranks
+  .ranks %>%
+    # Calculate confidence intervals
+    mutate(ci_high = estimate + std.error,
+           ci_low = estimate - std.error) %>% 
     # Flag schools that perform above/below benchmark (i.e., BTOs)
-    mutate(sig = ifelse(condval >= pos_bench | 
-                          condval <= neg_bench, 
-                        "yes", "no"))
+    mutate(sig = case_when(
+      (estimate > 0 & ci_high > 0) & (estimate > 0 & ci_low > 0) ~ "yes",
+      (estimate < 0 & ci_high < 0) & (estimate < 0 & ci_low < 0) ~ "yes",
+      TRUE ~ "no"
+    ))
 }
 ```
 
@@ -334,13 +332,13 @@ calc_bto <- function(.resids) {
 
 ```{r execute, echo=TRUE}
 # Execute function for each subject area
-bto_math <- calc_bto(resids_math) %>% 
+bto_math <- calc_bto(ranks_math) %>% 
   # Keep variables of interest. 
   # Note: we select and rename variables at the same time.
-  select(first_hs_code = grp, resid_math = condval, bto_math = sig)
+  select(first_hs_code = groupLevel, estimate:ci_low, bto_math = sig)
   
-bto_read <- calc_bto(resids_read) %>% 
-  select(first_hs_code = grp, resid_read = condval, bto_read = sig)
+bto_read <- calc_bto(ranks_read) %>% 
+  select(first_hs_code = groupLevel, estimate:ci_low, bto_read = sig)
 ```
 
 #### Merge datasets for plotting
