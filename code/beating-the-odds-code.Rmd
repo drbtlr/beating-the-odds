@@ -75,6 +75,7 @@ After installing your R packages and downloaded this guide's GitHub repository, 
 # Load packages
 library(tidyverse)
 library(lme4)
+library(merTools)
 
 # Read in some R functions that are convenience wrappers
 source("../R/functions.R")
