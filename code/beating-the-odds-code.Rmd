@@ -312,39 +312,43 @@ ranks_math <- merTools::expectedRank(m_math, groupFctr = "first_hs_code")
 ranks_read <- merTools::expectedRank(m_read, groupFctr = "first_hs_code")
 ```
 
-#### Create function to flag BTO schools
+#### Create function to flag BTO schools and performance levels
 
 ```{r calc-bto, echo=TRUE}
-calc_bto <- function(.ranks) {
+calc_bto <- function(.ranks, .var) {
   # Input model expected ranks
   .ranks %>%
     # Calculate confidence intervals
     mutate(ci_high = estimate + std.error,
            ci_low = estimate - std.error) %>% 
     # Flag schools that perform above/below benchmark (i.e., BTOs)
-    mutate(sig = case_when(
-      (estimate > 0 & ci_high > 0) & (estimate > 0 & ci_low > 0) ~ "yes",
-      (estimate < 0 & ci_high < 0) & (estimate < 0 & ci_low < 0) ~ "yes",
-      TRUE ~ "no"
-    ))
+    mutate(bto = ifelse(pctER >= 70 | pctER < 30, "yes", "no")) %>% # assume math/read have same cut offs
+    # Define performance levels
+    mutate(perform_lvl = case_when(
+      # Positive
+      between(pctER, 70, 80) ~ 1,
+      between(pctER, 80, 90) ~ 2,
+      pctER >= 90 ~ 3,
+      # Negative
+      between(pctER, 20, 30) ~ -3,
+      between(pctER, 10, 20) ~ -2,
+      pctER < 10 ~ -3,
+      # Other
+      TRUE ~ 0
+    )) %>% 
+    # Select and name variables of interest
+    select(first_hs_code = groupLevel, 
+           "estimate_{{ .var }}" := estimate, "pctER_{{ .var }}" := pctER, 
+           "bto_{{ .var }}" := bto, "perform_lvl_{{ .var }}" := perform_lvl)
 }
 ```
 
 #### Execute function for each subject area
 
 ```{r execute, echo=TRUE}
-# Execute function for each subject area
-bto_math <- calc_bto(ranks_math) %>% 
-  # Keep variables of interest. 
-  # Note: we select and rename variables at the same time.
-  select(first_hs_code = groupLevel, estimate_math = estimate,
-         se_math = std.error, ER_math = ER, pctER_math = pctER, 
-         ci_high_math = ci_high, ci_low_math = ci_low, bto_math = sig)
-  
-bto_read <- calc_bto(ranks_read) %>% 
-  select(first_hs_code = groupLevel, estimate_read = estimate,
-         se_read = std.error, ER_read = ER, pctER_read = pctER, 
-         ci_high_read = ci_high, ci_low_read = ci_low, bto_read = sig)
+# Create BTO datasets
+bto_math <- calc_bto(ranks_math, math)
+bto_read <- calc_bto(ranks_read, read)
 ```
 
 #### Merge datasets for plotting
