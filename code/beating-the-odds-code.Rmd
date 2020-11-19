@@ -62,6 +62,7 @@ To complete this tutorial, you will need R, R Studio, and the following R packag
 
 - `tidyverse`: For convenient data and output manipulation
 - `lme4`: To fit multilevel models
+- `glue`: To format and interpolate strings
 
 To install packages, such as `lme4`, run the following command in the R console:
 
@@ -75,6 +76,7 @@ After installing your R packages and downloaded this guide's GitHub repository, 
 # Load packages
 library(tidyverse)
 library(lme4)
+library(glue)
 
 # Read in some R functions that are convenience wrappers
 source("../R/functions.R")
@@ -335,10 +337,14 @@ calc_bto <- function(.ranks) {
 bto_math <- calc_bto(ranks_math) %>% 
   # Keep variables of interest. 
   # Note: we select and rename variables at the same time.
-  select(first_hs_code = groupLevel, estimate:ci_low, bto_math = sig)
+  select(first_hs_code = groupLevel, estimate_math = estimate,
+         se_math = std.error, ER_math = ER, pctER_math = pctER, 
+         ci_high_math = ci_high, ci_low_math = ci_low, bto_math = sig)
   
 bto_read <- calc_bto(ranks_read) %>% 
-  select(first_hs_code = groupLevel, estimate:ci_low, bto_read = sig)
+  select(first_hs_code = groupLevel, estimate_read = estimate,
+         se_read = std.error, ER_read = ER, pctER_read = pctER, 
+         ci_high_read = ci_high, ci_low_read = ci_low, bto_read = sig)
 ```
 
 #### Merge datasets for plotting
@@ -368,7 +374,7 @@ sch_bto_data %>%
   mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes",
                           "Performed Better/Worse than Expected", "Performed as Expected")) %>%
   filter(!is.na(bto_both)) %>%
-  ggplot(aes(resid_math, resid_read, color = bto_both)) +
+  ggplot(aes(estimate_math, estimate_read, color = bto_both)) +
   geom_point(size = 2, alpha = .6) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_hline(yintercept = 0, linetype = "dashed") +
