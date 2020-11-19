@@ -312,7 +312,7 @@ ranks_math <- merTools::expectedRank(m_math, groupFctr = "first_hs_code")
 ranks_read <- merTools::expectedRank(m_read, groupFctr = "first_hs_code")
 ```
 
-#### Create function to flag BTO schools and performance levels
+#### Create function to flag BTO schools
 
 ```{r calc-bto, echo=TRUE}
 calc_bto <- function(.ranks, .var) {
@@ -323,23 +323,9 @@ calc_bto <- function(.ranks, .var) {
            ci_low = estimate - std.error) %>% 
     # Flag schools that perform above/below benchmark (i.e., BTOs)
     mutate(bto = ifelse(pctER >= 70 | pctER < 30, "yes", "no")) %>% # assume math/read have same cut offs
-    # Define performance levels
-    mutate(perform_lvl = case_when(
-      # Positive
-      between(pctER, 70, 80) ~ 1,
-      between(pctER, 80, 90) ~ 2,
-      pctER >= 90 ~ 3,
-      # Negative
-      between(pctER, 20, 30) ~ -3,
-      between(pctER, 10, 20) ~ -2,
-      pctER < 10 ~ -3,
-      # Other
-      TRUE ~ 0
-    )) %>% 
     # Select and name variables of interest
-    select(first_hs_code = groupLevel, 
-           "estimate_{{ .var }}" := estimate, "pctER_{{ .var }}" := pctER, 
-           "bto_{{ .var }}" := bto, "perform_lvl_{{ .var }}" := perform_lvl)
+    select(first_hs_code = groupLevel, "estimate_{{ .var }}" := estimate, 
+           "pctER_{{ .var }}" := pctER, "bto_{{ .var }}" := bto)
 }
 ```
 
@@ -422,7 +408,7 @@ We examined the distribution of BTO schools as one example of how to determine p
 sch_bto_data %>% 
   mutate(bto_math = ifelse(bto_math == "yes", 
                            "Performed Better/Worse than Expected", "Performed as Expected")) %>%
-  ggplot(aes(resid_math)) +
+  ggplot(aes(estimate_math)) +
   geom_histogram(aes(fill = bto_math), alpha = .8) +
   scale_fill_manual(values = c("#999999", "#E69F00")) +
   bto_theme() +
@@ -431,80 +417,73 @@ sch_bto_data %>%
        title = "Distribution of Beating-the-Odds Schools in Math") 
 ```
 
-#### Set performance levels
+#### Create function to add performance levels
 
 ```{r set-perf-lvl, echo=TRUE}
-# Set performance levels
-bto_cuts <- sch_bto_data %>% 
-  # Set performance cuts for math
-  mutate(perf_math = case_when(
-    # No difference
-    bto_math == "no" ~ 0,
-    # Significant positive difference
-    bto_math == "yes" & between(resid_math, 0, .5) ~ 1,
-    bto_math == "yes" & between(resid_math, .5, 1) ~ 2,
-    bto_math == "yes" & resid_math > 1 ~ 3,
-    # Significant negative difference
-    bto_math == "yes" & between(resid_math, -.5, 0) ~ -1,
-    bto_math == "yes" & between(resid_math, -1, -.5) ~ -2,
-    bto_math == "yes" & resid_math < -1 ~ -3
-  )) %>% 
-  # Set performance cuts for reading, repeat previous steps
-  mutate(perf_read = case_when(
-    bto_read == "no" ~ 0,
-    bto_read == "yes" & between(resid_read, 0, .5) ~ 1,
-    bto_read == "yes" & between(resid_read, .5, 1) ~ 2,
-    bto_read == "yes" & resid_read > 1 ~ 3,
-    bto_read == "yes" & between(resid_read, -.5, 0) ~ -1,
-    bto_read == "yes" & between(resid_read, -1, -.5) ~ -2,
-    bto_read == "yes" & resid_read < -1 ~ -3
-  ))
+add_performance_levels <- function(.bto_data, .pctER.subject, .var) {
+  # Input BTO data
+  .bto_data %>% 
+    # Define performance levels
+    mutate(perform_lvl = case_when(
+      # Positive
+      between({{ .pctER.subject }}, 70, 80) ~ 1,
+      between({{ .pctER.subject }}, 80, 90) ~ 2,
+      {{ .pctER.subject }} >= 90 ~ 3,
+      # Negative
+      between({{ .pctER.subject }}, 20, 30) ~ -1,
+      between({{ .pctER.subject }}, 10, 20) ~ -2,
+      {{ .pctER.subject }} < 10 ~ -3,
+      # Other
+      TRUE ~ 0
+    )) %>%
+    # Label performance levels
+    mutate(perform_text = case_when(
+      perform_lvl == -3 ~ "Large\ndecrease",
+      perform_lvl == -2 ~ "Medium\ndecrease",
+      perform_lvl == -1 ~ "Small\ndecrease",
+      perform_lvl == 0 ~ "Not\nBTO",
+      perform_lvl == 1 ~ "Small\nincrease",
+      perform_lvl == 2 ~ "Medium\nincrease",
+      perform_lvl == 3 ~ "Large\nincrease"
+    )) %>% 
+    mutate(perform_text = fct_relevel(
+      perform_text, 
+      "Large\ndecrease", "Medium\ndecrease", "Small\ndecrease", 
+      "Not\nBTO", 
+      "Small\nincrease", "Medium\nincrease", "Large\nincrease")) %>% 
+    # Rename variables of interest
+    rename("perform_lvl_{{ .var }}" := perform_lvl,
+           "perform_text_{{ .var }}" := perform_text)
+}
 ```
 
-#### Create temporary datasets for plotting
+#### Execute function for each subject
+
+```{r}
+perf_lvl_math <- add_performance_levels(sch_bto_data, pctER_math, math) %>% 
+  # Drop reading variables for following merge
+  select(-contains("read"))
+
+perf_lvl_read <- add_performance_levels(sch_bto_data, pctER_read, read) %>% 
+  select(-contains("math"))
+```
+
+#### Merge datasets for plotting
 
 As a workaround, create separate datasets for math and reading then append datasets for plotting.
 
 ```{r plot-perf-lvl, echo=TRUE}
-# Create temp datasets for plotting
-bto_cuts_math <- bto_cuts %>% 
-  count(perf_math) %>% 
-  mutate(subject = "Math") %>% 
-  select(subject, cut = perf_math, n)
-
-bto_cuts_read <- bto_cuts %>% 
-  count(perf_read) %>% 
-  mutate(subject = "Reading") %>% 
-  select(subject, cut = perf_read, n)
-
-# Merge temp datasets
-bto_cuts_math_read <- bind_rows(bto_cuts_math, bto_cuts_read)
-
-# Create variables for plotting
-bto_cuts_math_read_labeled <- bto_cuts_math_read %>% 
-  mutate(cut = case_when(
-    cut == -3 ~ "Large\nnegative\ndecrease",
-    cut == -2 ~ "Medium\nnegative\ndecrease",
-    cut == -1 ~ "Small\nnegative\ndecrease",
-    cut == 0 ~ "No\nsignificant\ndecrease",
-    cut == 1 ~ "Small\npositive\nincrease",
-    cut == 2 ~ "Medium\npositive\nincrease",
-    cut == 3 ~ "Large\npositive\nincrease"
-  )) %>% 
-  mutate(cut = fct_relevel(
-    cut, 
-    "Large\nnegative\ndecrease", "Medium\nnegative\ndecrease", 
-    "Small\nnegative\ndecrease", "No\nsignificant\ndecrease", 
-    "Small\npositive\nincrease", "Medium\npositive\nincrease", 
-    "Large\npositive\nincrease")) %>% 
-  filter(!is.na(cut))
+bto_perform_lvl <- left_join(perf_lvl_math, perf_lvl_read)
 ```
 
 #### Plot performance levels
 
 ```{r}
+## START HERE ## -----------------------------------------------------------------------
+bto_perform_lvl_labeled %>% names()
+
 # Plot performance levels
-ggplot(bto_cuts_math_read_labeled, aes(cut, n, fill = subject)) +
+ggplot(bto_perform_lvl_labeled, aes(text, n, fill = subject)) +
   geom_col(position = position_dodge(.85), width = .8) +
   geom_text(aes(label = n),
             position = position_dodge(.85), vjust = -.45) +
