@@ -554,7 +554,7 @@ prior_achieve <- faketucky %>%
 ```{r merge-prior-perf, echo=TRUE}
 prior_achieve_bto <- bto_perform_lvl %>%
   select(first_hs_code, starts_with("bto")) %>% 
-  left_join(prior_achieve1)
+  left_join(prior_achieve)
 ```
 
 #### Plot prior performance
@@ -567,7 +567,7 @@ prior_achieve_bto %>%
   filter(!is.na(bto_both)) %>% 
   ggplot(aes(rank_11_math, rank_11_read)) + 
   geom_point(aes(color = bto_both),
-             size = 3, alpha = .6) +
+             size = 2, alpha = .6) +
   geom_vline(xintercept = 50, linetype = "dashed") +
   geom_hline(yintercept = 50, linetype = "dashed") +
   scale_color_manual(values = c("#999999", "#E69F00")) +
@@ -575,7 +575,7 @@ prior_achieve_bto %>%
   labs(x = "Math (percentile rank)", 
        y = "Reading (percentile rank)", 
        color = "",
-       title = "Prior Performance by Beating-the-Odds Performance Categories")
+       title = "Prior Performance by Beating-the-Odds Status")
 ```
 
 ### BTO schools by student demographics
