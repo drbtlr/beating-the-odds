@@ -629,36 +629,35 @@ ggplot(prio_perf_labeled, aes(factor(perf), avg_prank)) +
 #### Calculate the proportion of students by performance level
 
 ```{r bto-demos-data, echo=TRUE}
-# Create dataset for plotting
-for_demo_plot <- bto_cuts %>%
+prop_stn_perform_lvl <- bto_perform_lvl %>% 
   # Label BTO schools
-  mutate(perf_high_low = case_when(
-    perf_math > 0 ~ "Math_High Performing",
-    perf_math < 0 ~ "Math_Low Performing",
-    perf_read > 0 ~ "Read_High Performing",
-    perf_read < 0 ~ "Read_Low Performing",
+  mutate(perform_high_low = case_when(
+    perform_lvl_math > 0 ~ "Math_High Performing",
+    perform_lvl_math < 0 ~ "Math_Low Performing",
+    perform_lvl_read > 0 ~ "Read_High Performing",
+    perform_lvl_read < 0 ~ "Read_Low Performing",
     TRUE ~ NA_character_
-  )) %>%
+  )) %>% 
   # Merge with school demographics
   left_join(sch_avg_by_cohort %>% 
               filter(chrt_ninth == 2010) %>% 
               mutate(first_hs_code = factor(first_hs_code))) %>% 
-  drop_na(perf_high_low) %>% 
+  drop_na(perform_high_low) %>% 
   # Calculate proportions by performance level
-  group_by(perf_high_low) %>% 
+  group_by(perform_high_low) %>% 
   summarise(prop_white = mean(sch_white, na.rm = TRUE),
             prop_frpl = mean(sch_frpl, na.rm = TRUE),
             prop_sped = mean(sch_sped, na.rm = TRUE),
             prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
   # Convert to long format for plotting
   pivot_longer(cols = starts_with("prop")) %>% 
-  rename(group = perf_high_low)
+  rename(group = perform_high_low)
 ```
 
 #### Plot school demographics by performance level
 
 ```{r bto-demo-plot, echo=TRUE}
-for_demo_plot %>%
+prop_stn_perform_lvl %>%
   separate(group, into = c("subject", "group"), sep = "_") %>% 
   mutate(group = fct_relevel(group, "Low Performing", "High Performing")) %>% 
   mutate(value = round(value * 100, 1)) %>% 
@@ -674,7 +673,7 @@ for_demo_plot %>%
             position = position_dodge(.85), vjust = -.45) +
   expand_limits(y = c(0, 100)) +
   facet_wrap(~ subject, nrow = 2) +
-  scale_fill_manual(values = c("#9E002A", "#009E73")) +
+  scale_fill_manual(values = c("#E69F00", "#999999")) +
   bto_theme() +
   theme(panel.grid.major.y = element_line(color = "grey92")) +
   labs(x = "", y = "Percent of Students", fill = "",
