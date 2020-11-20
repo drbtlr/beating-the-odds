@@ -332,7 +332,6 @@ calc_bto <- function(.ranks, .var) {
 #### Execute function for each subject area
 
 ```{r execute, echo=TRUE}
-# Create BTO datasets
 bto_math <- calc_bto(ranks_math, math)
 bto_read <- calc_bto(ranks_read, read)
 ```
@@ -479,11 +478,13 @@ bto_perform_lvl <- left_join(perf_lvl_math, perf_lvl_read)
 #### Plot performance levels
 
 ```{r}
-## START HERE ## -----------------------------------------------------------------------
-bto_perform_lvl_labeled %>% names()
-
-# Plot performance levels
-ggplot(bto_perform_lvl_labeled, aes(text, n, fill = subject)) +
+bto_perform_lvl %>% 
+  select(first_dist_code, starts_with("perform_text")) %>% 
+  pivot_longer(-first_dist_code, 
+               names_to = "subject", values_to = "perform_lvl") %>% 
+  count(subject, perform_lvl) %>% 
+  mutate(subject = ifelse(str_detect(subject, "math"), "Math", "Reading")) %>% 
+  ggplot(aes(perform_lvl, n, fill = subject)) +
   geom_col(position = position_dodge(.85), width = .8) +
   geom_text(aes(label = n),
             position = position_dodge(.85), vjust = -.45) +
@@ -494,55 +495,15 @@ ggplot(bto_perform_lvl_labeled, aes(text, n, fill = subject)) +
        title = "Distribution of Beating-the-Odds Schools in Math and Reading") 
 ```
 
-#### Count number of schools by performance levels
+#### Create a table of schools by performance levels
 
 Creating tables or plots that compare school performance levels in math and reading allows us to see whether schools perform better or worse in one or two subject areas. In this example, we see that school performance in math and reading are correlated. This information can be used to inform the way we think about best practices.
 
-```{r bto-cuts-counts, echo=TRUE}
-# Count schools by performance level
-num_perf_level <- bto_cuts %>%
-  # Recode variable for plotting
-  mutate(perf_math = case_when(
-    perf_math == -3 ~ "Large\nnegative\ndecrease",
-    perf_math == -2 ~ "Medium\nnegative\ndecrease",
-    perf_math == -1 ~ "Small\nnegative\ndecrease",
-    perf_math == 0 ~ "No\nsignificant\ndecrease",
-    perf_math == 1 ~ "Small\npositive\nincrease",
-    perf_math == 2 ~ "Medium\npositive\nincrease",
-    perf_math == 3 ~ "Large\npositive\nincrease"
-  )) %>% 
-  mutate(perf_math = fct_relevel(
-    perf_math, 
-    "Large\nnegative\ndecrease", "Medium\nnegative\ndecrease", 
-    "Small\nnegative\ndecrease", "No\nsignificant\ndecrease", 
-    "Small\npositive\nincrease", "Medium\npositive\nincrease", 
-    "Large\npositive\nincrease")) %>%
-  mutate(perf_read = case_when(
-    perf_read == -3 ~ "Large\nnegative\ndecrease",
-    perf_read == -2 ~ "Medium\nnegative\ndecrease",
-    perf_read == -1 ~ "Small\nnegative\ndecrease",
-    perf_read == 0 ~ "No\nsignificant\ndecrease",
-    perf_read == 1 ~ "Small\npositive\nincrease",
-    perf_read == 2 ~ "Medium\npositive\nincrease",
-    perf_read == 3 ~ "Large\npositive\nincrease"
-  )) %>% 
-  mutate(perf_read = fct_relevel(
-    perf_read, 
-    "Large\nnegative\ndecrease", "Medium\nnegative\ndecrease", 
-    "Small\nnegative\ndecrease", "No\nsignificant\ndecrease", 
-    "Small\npositive\nincrease", "Medium\npositive\nincrease", 
-    "Large\npositive\nincrease")) %>%
-  # Drop missing values for plotting
-  drop_na(perf_math, perf_read) %>%
-  # Count number of schools by performance levels
-  count(perf_math, perf_read)
-```
-
-#### Create a table of schools by performance levels
-
 ```{r bto-cuts-table, echo=TRUE}
-# Plot a table
-ggplot(num_perf_level, aes(perf_math, perf_read)) +
+bto_perform_lvl %>% 
+  select(first_dist_code, starts_with("perform_text")) %>%
+  count(perform_text_math, perform_text_read) %>% 
+  ggplot(aes(perform_text_math, perform_text_read)) +
   geom_tile(fill = "white") +
   geom_text(aes(label = n)) +
   bto_theme() +
