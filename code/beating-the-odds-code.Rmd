@@ -479,8 +479,8 @@ bto_perform_lvl <- left_join(perf_lvl_math, perf_lvl_read)
 
 ```{r}
 bto_perform_lvl %>% 
-  select(first_dist_code, starts_with("perform_text")) %>% 
-  pivot_longer(-first_dist_code, 
+  select(first_hs_code, starts_with("perform_text")) %>% 
+  pivot_longer(-first_hs_code, 
                names_to = "subject", values_to = "perform_lvl") %>% 
   count(subject, perform_lvl) %>% 
   mutate(subject = ifelse(str_detect(subject, "math"), "Math", "Reading")) %>% 
@@ -501,7 +501,7 @@ Creating tables or plots that compare school performance levels in math and read
 
 ```{r bto-cuts-table, echo=TRUE}
 bto_perform_lvl %>% 
-  select(first_dist_code, starts_with("perform_text")) %>%
+  select(first_hs_code, starts_with("perform_text")) %>%
   count(perform_text_math, perform_text_read) %>% 
   ggplot(aes(perform_text_math, perform_text_read)) +
   geom_tile(fill = "white") +
@@ -535,73 +535,46 @@ bto_perform_lvl %>%
 
 #### Calculate average prior achievement for each school
 
-```{r calc-bto-prior-perf, echo=TRUE}
-# Calculate average prior achievement for each school
-df_avg_prior_ach <- faketucky %>%
-  # Restrict to first cohort
-  filter(chrt_ninth == "2009") %>%
-  select(first_hs_code, scale_score_8_math, scale_score_8_read) %>%
+```{r calc-prior-perf, echo=TRUE}
+prior_achieve <- faketucky %>% 
+  filter(chrt_ninth == "2009") %>% 
+  select(first_hs_code, scale_score_11_math, scale_score_11_read) %>%
+  mutate(first_hs_code = as.character(first_hs_code)) %>% 
   # Calculate average scores by subject
   group_by(first_hs_code) %>%
-  summarise(avg_8_read = mean(scale_score_8_read, na.rm = TRUE),
-            avg_8_math = mean(scale_score_8_math, na.rm = TRUE)) %>%
+  summarise(avg_11_read = mean(scale_score_11_read, na.rm = TRUE),
+            avg_11_math = mean(scale_score_11_math, na.rm = TRUE)) %>% 
   # Rank schools by subject
-  mutate(first_hs_code = as.numeric(first_hs_code),
-         avg_8_read_prank = rank(avg_8_read)/length(avg_8_read)*100,
-         avg_8_math_prank = rank(avg_8_math)/length(avg_8_math)*100)
+  mutate(rank_11_read = rank(avg_11_read) / length(avg_11_read) * 100,
+         rank_11_math = rank(avg_11_math) / length(avg_11_math) * 100)
 ```
 
-#### Create temporary datasets for plotting
+#### Merge datasets for plotting
 
-```{r bto-prior-perf-plot, echo=TRUE}
-# Create temp datasets for math and read
-prior_perf_math <- left_join(bto_cuts, 
-                             df_avg_prior_ach %>% 
-                               mutate(first_hs_code = factor(first_hs_code))) %>% 
-  select(perf = perf_math, avg_prank = avg_8_math_prank) %>% 
-  mutate(subject = "Math")
-
-prior_perf_read <- left_join(bto_cuts, 
-                             df_avg_prior_ach %>% 
-                               mutate(first_hs_code = factor(first_hs_code))) %>% 
-  select(perf = perf_read, avg_prank = avg_8_read_prank) %>% 
-  mutate(subject = "Reading")
-
-# Merge temp datasets
-prior_perf <- bind_rows(prior_perf_math, prior_perf_read) %>% 
-  drop_na()
-
-# Create variables for plotting
-prio_perf_labeled <- prior_perf %>% 
-  mutate(perf = case_when(
-    perf == -3 ~ "Large\nnegative\ndecrease",
-    perf == -2 ~ "Medium\nnegative\ndecrease",
-    perf == -1 ~ "Small\nnegative\ndecrease",
-    perf == 0 ~ "No\nsignificant\ndecrease",
-    perf == 1 ~ "Small\npositive\nincrease",
-    perf == 2 ~ "Medium\npositive\nincrease",
-    perf == 3 ~ "Large\npositive\nincrease"
-  )) %>% 
-  mutate(perf = fct_relevel(
-    perf, 
-    "Large\nnegative\ndecrease", "Medium\nnegative\ndecrease", 
-    "Small\nnegative\ndecrease", "No\nsignificant\ndecrease", 
-    "Small\npositive\nincrease", "Medium\npositive\nincrease", 
-    "Large\npositive\nincrease")) %>%
-  filter(perf != "No\nsignificant\ndecrease")
+```{r merge-prior-perf, echo=TRUE}
+prior_achieve_bto <- bto_perform_lvl %>%
+  select(first_hs_code, starts_with("bto")) %>% 
+  left_join(prior_achieve1)
 ```
 
 #### Plot prior performance
 
-```{r, echo=TRUE, fig.height=8}
-ggplot(prio_perf_labeled, aes(factor(perf), avg_prank)) +
-  geom_jitter(aes(color = subject), size = 3, width = 0.3, alpha = 0.55) +
-  ylim(0,100) +
-  facet_wrap(~ subject, ncol = 1) +
-  scale_color_manual(values = c("#E69F00", "#999999")) +
+```{r plot-prior-perf, echo=TRUE, fig.height=8}
+prior_achieve_bto %>% 
+  mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes",
+                          "Performed Better than\nExpected in Math & Reading", 
+                          "Performed as Expected\nExpected in Math & Reading")) %>% 
+  filter(!is.na(bto_both)) %>% 
+  ggplot(aes(rank_11_math, rank_11_read)) + 
+  geom_point(aes(color = bto_both),
+             size = 3, alpha = .6) +
+  geom_vline(xintercept = 50, linetype = "dashed") +
+  geom_hline(yintercept = 50, linetype = "dashed") +
+  scale_color_manual(values = c("#999999", "#E69F00")) +
   bto_theme() +
-  theme(legend.position = "none") +
-  labs(x = "Performance Level", y = "Percentile Rank", color = "",
+  labs(x = "Math (percentile rank)", 
+       y = "Reading (percentile rank)", 
+       color = "",
        title = "Prior Performance by Beating-the-Odds Performance Categories")
 ```
 
