@@ -56,7 +56,7 @@ To replicate or modify the analysis described in this guide, click the "Download
 
 We encourage you to go to our [Participate page](https://opensdp.github.io/participate/) to read about more ways to engage with the OpenSDP community or reach out for assistance in adapting this code for your specific context.
 
-### Installing and Loading R Packages
+### Installing and Loading R Packages and Plotting Themes
 
 To complete this tutorial, you will need R, R Studio, and the following R packages installed on your machine: 
 
@@ -68,9 +68,9 @@ To install packages, such as `lme4`, run the following command in the R console:
 
 `install.packages("lme4")`
 
-In addition, this guide will draw from OpenSDP-written functions defined in the `functions.R` document, which is located in the `R` folder of this guide’s [GitHub repository](https://github.com/drbtlr/beating-the-odds). Please make sure to have downloaded the entire GitHub repository to run this code.
+In addition, we use a custom ggplot theme - `sdp_theme()` - to make text size, font and color, axis lines, axis text, and other standard chart components into an OpenSDP style. Custom themes can help you establish a professional brand for your data visualizations. Organizations such as [The Urban Institute](https://medium.com/@urban_institute/why-the-urban-institute-visualizes-data-with-ggplot2-46d8cfc7ee67) and [BBC News](https://medium.com/bbc-visual-and-data-journalism/how-the-bbc-visual-and-data-journalism-team-works-with-graphics-in-r-ed0b35693535) make use of custom ggplot themes to create publication-ready charts that are consistent with their organization's branding. While you may not have a dedicated marketing team, making an effort to match chart style and formatting to your district's brand can help your results stand out to stakeholders. 
 
-After installing your R packages and downloaded this guide's GitHub repository, run the chunk of code below to load them onto your computer.
+After installing your R packages and downloading this guide's GitHub repository, run the chunk of code below to load your packages and custom theme onto your computer.
 
 ```{r load-packages, echo=TRUE}
 # Load packages
@@ -78,8 +78,22 @@ library(tidyverse)
 library(lme4)
 library(glue)
 
-# Read in some R functions that are convenience wrappers
-source("../R/functions.R")
+# Set custom ggplot2 theme for BTO guide
+sdp_theme <- function() {
+  theme_minimal() +
+    theme(
+      panel.grid = element_blank(),
+      plot.title = element_text(size = 16, face = "bold"),
+      plot.title.position = "plot",
+      plot.subtitle = element_text(size = 14),
+      axis.title = element_text(size = 12),
+      axis.text = element_text(size = 11),
+      legend.position = "top",
+      legend.text = element_text(size = 11),
+      strip.text = element_text(size = 11, face = "bold"),
+      strip.background = element_rect(fill = "gray80", color = "gray80")
+    )
+}
 ```
 
 ### About the Data
