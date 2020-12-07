@@ -68,7 +68,7 @@ To install packages, such as `lme4`, run the following command in the R console:
 
 `install.packages("lme4")`
 
-In addition, we use a custom ggplot theme - `sdp_theme()` - to make text size, font and color, axis lines, axis text, and other standard chart components into an OpenSDP style. Custom themes can help you establish a professional brand for your data visualizations. Organizations such as [The Urban Institute](https://medium.com/@urban_institute/why-the-urban-institute-visualizes-data-with-ggplot2-46d8cfc7ee67) and [BBC News](https://medium.com/bbc-visual-and-data-journalism/how-the-bbc-visual-and-data-journalism-team-works-with-graphics-in-r-ed0b35693535) make use of custom ggplot themes to create publication-ready charts that are consistent with their organization's branding. While you may not have a dedicated marketing team, making an effort to match chart style and formatting to your district's brand can help your results stand out to stakeholders. 
+In addition, we use a custom ggplot theme -- `sdp_theme()` -- to make text size, font and color, axis lines, axis text, and other standard chart components into an OpenSDP style. Custom themes can help you establish a professional brand for your data visualizations. Organizations such as [The Urban Institute](https://medium.com/@urban_institute/why-the-urban-institute-visualizes-data-with-ggplot2-46d8cfc7ee67) and [BBC News](https://medium.com/bbc-visual-and-data-journalism/how-the-bbc-visual-and-data-journalism-team-works-with-graphics-in-r-ed0b35693535) make use of custom ggplot themes to create publication-ready charts that are consistent with their organization's branding. While you may not have a dedicated marketing team, making an effort to match chart style and formatting to your district's brand can help your results stand out to stakeholders. 
 
 After installing your R packages and downloading this guide's GitHub repository, run the chunk of code below to load your packages and custom theme onto your computer.
 
@@ -200,7 +200,7 @@ sch_avg_by_cohort <- faketucky %>%
          sch_gifted = mean(gifted_ever_in_hs, na.rm = TRUE),
          sch_8_math = mean(scale_score_8_math, na.rm = TRUE),
          sch_8_read = mean(scale_score_8_read, na.rm = TRUE)) %>% 
-  # Remember to ungroup the data frame
+  # Remember to ungroup
   ungroup()
 ```
 
@@ -209,7 +209,7 @@ sch_avg_by_cohort <- faketucky %>%
 ```{r center-vars, echo=TRUE}
 # Calculate across-year cohort averages
 cohort_avg <- sch_avg_by_cohort %>% 
-  # Flag 2010 cohort
+  # Flag 2010 cohort (for modeling)
   mutate(flag_2010_cohort = ifelse(chrt_ninth == 2010, 1, 0)) %>% 
   # Group by cohort year
   group_by(chrt_ninth) %>%
@@ -280,7 +280,7 @@ Examine the coefficients and standard errors for each variable. Ask yourself if 
 
 For information on other model checking and sensitivity analysis for multilevel models, see Snijders and Berkhof's chapter on [Diagnostic Checks for Multilevel Models](https://www.stats.ox.ac.uk/~snijders/handbook_ml_ch3.pdf).
 
-Below we printed a summary of the math model for illustrative purposes.
+Below we print a summary of the math model for illustrative purposes.
 
 ```{r inspect-fit, echo=TRUE}
 # Call summary statistics for the math model 
@@ -290,7 +290,7 @@ summary(m_math)
 #summary(m_read)
 ```
 
-Visual diagnostic plots are another way to inspect the quality of your model. Using a helpful plotting function found in the [merTools package](https://cran.r-project.org/web/packages/merTools/index.html), we plot the results of a simulation of random effects for each model. Look for variation and confidence bands (dark bars) that do now overlap the red line for zero. Here, we established that a number of school effects are meaningfully from zero.
+Visual diagnostic plots are another way to inspect the quality of your model. Using a helpful plotting function found in the [merTools package](https://cran.r-project.org/web/packages/merTools/index.html), we plot the results of a simulation of random effects for each model. Look for variation and confidence bands (dark bars) that do not overlap the red line for zero. Here, we established that a number of school effects are meaningfully from zero.
 
 *Note:* We do not load the `merTools` package because it masks the `select` function from `dplyr` (found in `tidyverse`). Instead, we chose to call individual functions directly from `merTools` using the `::` operator (e.g., `merTools::plotREsim`). This is a handy workaround when dealing with packages with conflicting functions.  
 
@@ -304,20 +304,9 @@ merTools::plotREsim(merTools::REsim(m_math, n.sims = 100), stat = "median", sd =
 
 #### Step 4: Calculate statistics for beating-the-odds schools
 
-We used the model residuals to identify three groups of schools:
+We used a measure "expected rank" to identify beating-the-odds schools. Expected rank provides the percentile ranks for the observed groups (i.e., schools) in the random effect distribution taking into account both the magnitude and uncertainty of the estimated effect for each group. Incorporating magnitude and uncertainty in the beating-the-odds process is a key advantage of using this technique when assessing the performance of schools with small student populations. Estimates for small schools are more uncertain due to having few student observations. A beating-the-odds analysis that relies only on the confidence internal and point estimates biases the results towards small schools with uncertain, but very large positive values. Using expected ranks mitigates these biases.
 
-* schools that were beating the odds and performed better than expected
-* schools that performed the same as expected
-* schools that performed worse than expected
-
-This last group can also be helpful as the information can be used to provide targeted support.
-
-We constructed a 95 percent confidence interval around each school's residual, using the
-formula: 
-
-```95 percent confidence interval = School residual ±1.96 × Residual standard error.```
-
-Confidence intervals allowed us to determine whether a value of zero was just as plausible as the estimated residual. We identified schools as beating the odds if the 95 percent confidence interval did not include zero and if the residual was positive. Conversely, schools were identified as performing worse than expected if the 95 percent confidence interval did not include zero and if the residual was negative. Schools that performed as expected were those with confidence intervals that included zero.
+We extracted the expected rank and more reliable confidence intervals is possible using the `merTools` package's `REsim` and `expectedRank` functions. Next, we identified schools as beating the odds if they were above the 70th percentile of all schools. Conversely, schools were identified as performing worse than expected if they were below the 30th percentile.
 
 #### Calculate school-level expected ranks
 
