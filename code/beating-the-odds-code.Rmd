@@ -382,7 +382,7 @@ sch_bto_data %>%
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_hline(yintercept = 0, linetype = "dashed") +
   scale_color_manual(values = c("#999999", "#E69F00")) +
-  bto_theme() +
+  sdp_theme() +
   theme(panel.grid = element_line(color = "grey92")) +
   labs(x = "Math (actual - predicted)",
        y = "Reading (actual - predicted)",
@@ -424,7 +424,7 @@ sch_bto_data %>%
   ggplot(aes(estimate_math)) +
   geom_histogram(aes(fill = bto_math), alpha = .8) +
   scale_fill_manual(values = c("#999999", "#E69F00")) +
-  bto_theme() +
+  sdp_theme() +
   theme(panel.grid = element_line(color = "grey92")) +
   labs(x = "Math (actual - predicted)", y = "Number of Schools", fill = "",
        title = "Distribution of Beating-the-Odds Schools in Math") 
@@ -503,7 +503,7 @@ bto_perform_lvl %>%
   geom_text(aes(label = n),
             position = position_dodge(.85), vjust = -.45) +
   scale_fill_manual(values = c("#E69F00", "#999999")) +
-  bto_theme() +
+  sdp_theme() +
   theme(panel.grid.major.y = element_line(color = "grey92")) +
   labs(x = "", y = "Number of Schools", fill = "",
        title = "Distribution of Beating-the-Odds Schools in Math and Reading") 
@@ -520,7 +520,7 @@ bto_perform_lvl %>%
   ggplot(aes(perform_text_math, perform_text_read)) +
   geom_tile(fill = "white") +
   geom_text(aes(label = n)) +
-  bto_theme() +
+  sdp_theme() +
   labs(x = "Math Performance", y = "Reading Performance",
        title = "School Counts by Performance Categories for Math and Reading")
 ```
@@ -585,7 +585,7 @@ prior_achieve_bto %>%
   geom_vline(xintercept = 50, linetype = "dashed") +
   geom_hline(yintercept = 50, linetype = "dashed") +
   scale_color_manual(values = c("#999999", "#E69F00")) +
-  bto_theme() +
+  sdp_theme() +
   labs(x = "Math (percentile rank)", 
        y = "Reading (percentile rank)", 
        color = "",
@@ -661,7 +661,7 @@ prop_stn_perform_lvl %>%
   expand_limits(y = c(0, 100)) +
   facet_wrap(~ subject, nrow = 2) +
   scale_fill_manual(values = c("#E69F00", "#999999")) +
-  bto_theme() +
+  sdp_theme() +
   theme(panel.grid.major.y = element_line(color = "grey92")) +
   labs(x = "", y = "Percent of Students", fill = "",
        title = "School Demographics by Performance Status in Math and Reading")
