@@ -382,7 +382,7 @@ sch_bto_data %>%
 
 ### BTO schools by performance level
 
-**Purpose:** This analysis examines the distribution of beating-the-odds schools in math and reading and establishes performance levels (ex. small, medium, or large changes in between the predicted and actual school performance). Results provide an overall summary of a beating-the-odds analysis.  
+**Purpose:** This analysis examines the distribution of beating-the-odds schools in math and reading and establishes performance levels (e.g., small, medium, or large changes in between the predicted and actual school performance). Results provide an overall summary of a beating-the-odds analysis.  
 
 **Required Analysis File Variables:**
 
@@ -399,29 +399,22 @@ sch_bto_data %>%
 
 **Possible Next Steps or Action Plans:** Identify which schools are performing at different levels. Develop academic plan for schools at each performance level.
 
-**Analytic Technique:** Identify school performance levels by subtracting each school's predicted achievement from its actual achievement and determining reasonable cut points for performance categories (such as small, medium, or large). Count the number of schools by performance level and plot a matrix to compare school performance across subject areas.  
+**Analytic Technique:** Determining reasonable cut points for performance categories (such as small, medium, or large). Count the number of schools by performance level and plot a matrix to compare school performance across subject areas.  
 
 #### Determine performance levels
 
-We examined the distribution of BTO schools as one example of how to determine performance levels. We recognize that there are a number of other ways to establish performance levels. Examples include referencing academic literature, technical documents, pilot studies, statistical analyses, etc.
+There are a number of ways to establish performance levels. Examples include referencing academic literature, technical documents, pilot studies, statistical analyses, etc. For illustrative purposes, we aligned performance levels to percentile ranks where:
 
-```{r bto-cuts-plot, echo=TRUE}
-# Determine performance levels
-sch_bto_data %>% 
-  mutate(bto_math = ifelse(bto_math == "yes", 
-                           "Performed Better/Worse than Expected", "Performed as Expected")) %>%
-  ggplot(aes(estimate_math)) +
-  geom_histogram(aes(fill = bto_math), alpha = .8) +
-  scale_fill_manual(values = c("#999999", "#E69F00")) +
-  sdp_theme() +
-  theme(panel.grid = element_line(color = "grey92")) +
-  labs(x = "Math (actual - predicted)", y = "Number of Schools", fill = "",
-       title = "Distribution of Beating-the-Odds Schools in Math") 
-```
-
-#### Create function to add performance levels
+- Large performance increase = 90th percentile or above
+- Medium performance increase = 80th to 89th percentile
+- Small performance increase = 70th to 79th percentile
+- No performance increase/decrease (i.e., not BTO) = 30th to 69th percentile
+- Small performance decrease = 20th to 29th percentile
+- Medium performance decrease = 10th to 19th percentile
+- Large performance decrease = 9th percentile or below
 
 ```{r set-perf-lvl, echo=TRUE}
+# Create function to add performance levels
 add_performance_levels <- function(.bto_data, .pctER.subject, .var) {
   # Input BTO data
   .bto_data %>% 
@@ -471,8 +464,6 @@ perf_lvl_read <- add_performance_levels(sch_bto_data, pctER_read, read) %>%
 ```
 
 #### Merge datasets for plotting
-
-As a workaround, create separate datasets for math and reading then append datasets for plotting.
 
 ```{r plot-perf-lvl, echo=TRUE}
 bto_perform_lvl <- left_join(perf_lvl_math, perf_lvl_read)
