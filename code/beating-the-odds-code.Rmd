@@ -1,7 +1,7 @@
 ---
 title: "Beating the Odds"
 author: "Aaron Butler & Hannah Poquette"
-date: "June 2, 2020"
+date: "December 8, 2020"
 output:
   html_document:
     theme: simplex
