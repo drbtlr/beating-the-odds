@@ -373,11 +373,8 @@ sch_bto_data %>%
   scale_color_manual(values = c("#999999", "#E69F00")) +
   sdp_theme() +
   theme(panel.grid = element_line(color = "grey92")) +
-  labs(x = "Math (actual - predicted)",
-       y = "Reading (actual - predicted)",
-       color = "",
-       title = "Beating-the-Odds Schools in Math and Reading",
-       subtitle = "Schools in upper-right corner are performing better than expected\nin math and reading, whereas schools in lower-left corner or under\nperforming in both subject areas.")
+  labs(x = "Math Residual", y = "Reading Residual", color = "",
+       title = "Beating-the-Odds Schools in Math and Reading")
 ```
 
 ### BTO schools by performance level
@@ -485,7 +482,7 @@ bto_perform_lvl %>%
   scale_fill_manual(values = c("#E69F00", "#999999")) +
   sdp_theme() +
   theme(panel.grid.major.y = element_line(color = "grey92")) +
-  labs(x = "", y = "Number of Schools", fill = "",
+  labs(x = "Performance Level", y = "Number of Schools", fill = "",
        title = "Distribution of Beating-the-Odds Schools in Math and Reading") 
 ```
 
@@ -498,7 +495,8 @@ bto_perform_lvl %>%
   select(first_hs_code, starts_with("perform_text")) %>%
   count(perform_text_math, perform_text_read) %>% 
   ggplot(aes(perform_text_math, perform_text_read)) +
-  geom_tile(fill = "white") +
+  geom_tile(aes(width = .95, height = .95),
+            fill = "white", color = "black") +
   geom_text(aes(label = n)) +
   sdp_theme() +
   labs(x = "Math Performance", y = "Reading Performance",
@@ -566,8 +564,8 @@ prior_achieve_bto %>%
   geom_hline(yintercept = 50, linetype = "dashed") +
   scale_color_manual(values = c("#999999", "#E69F00")) +
   sdp_theme() +
-  labs(x = "Math (percentile rank)", 
-       y = "Reading (percentile rank)", 
+  labs(x = "Prior Performance - Math (Percentile Rank)", 
+       y = "Prior Performance - Reading (Percentile Rank)", 
        color = "",
        title = "Prior Performance by Beating-the-Odds Status")
 ```
@@ -601,8 +599,8 @@ prop_stn_perform_lvl <- bto_perform_lvl %>%
   mutate(perform_high_low = case_when(
     perform_lvl_math > 0 ~ "Math_High Performing",
     perform_lvl_math < 0 ~ "Math_Low Performing",
-    perform_lvl_read > 0 ~ "Read_High Performing",
-    perform_lvl_read < 0 ~ "Read_Low Performing",
+    perform_lvl_read > 0 ~ "Reading_High Performing",
+    perform_lvl_read < 0 ~ "Reading_Low Performing",
     TRUE ~ NA_character_
   )) %>% 
   # Merge with school demographics
@@ -640,10 +638,10 @@ prop_stn_perform_lvl %>%
             position = position_dodge(.85), vjust = -.45) +
   expand_limits(y = c(0, 100)) +
   facet_wrap(~ subject, nrow = 2) +
-  scale_fill_manual(values = c("#E69F00", "#999999")) +
+  scale_fill_manual(values = c("#999999", "#E69F00")) +
   sdp_theme() +
   theme(panel.grid.major.y = element_line(color = "grey92")) +
-  labs(x = "", y = "Percent of Students", fill = "",
+  labs(x = "Student Group", y = "Percent of Students", fill = "",
        title = "School Demographics by Performance Status in Math and Reading")
 ```
 
