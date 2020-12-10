@@ -34,7 +34,20 @@ In this guide, you will use statistical models to predict school performance bas
 
 ### Purpose and Overview of Analyses
 
-School leaders often want to identify promising practices that distinguish high-performing schools from their counterparts and facilitate the transfer of some of these practices to struggling schools. A beating-the-odds analysis is one approach school leaders can take to identify schools that perform better or worse than expected, given the unique student populations they serve.
+School leaders often want to identify promising practices that distinguish high-performing schools from their counterparts and facilitate the transfer of some of these practices to struggling schools. A beating-the-odds analysis is one approach school leaders can take to identify schools that perform better or worse than expected, given the unique student populations they serve. In general, beating-the-odds analyses predict school performance based on the demographic make up of schools’ student populations and then compare these predictions with actual school performance. Schools with observed performance that is statistically significantly greater than their predicted performance are typically considered to be performing better than expected, or beating the odds. Schools with observed performance that is statistically significantly less than their predicted performance meet the worse than expected criteria. 
+
+There are a number of examples of beating-the-odds analyses being used to identify schools exceeding expectations in achievement gap closure, reading, English language arts, math, graduation rate, and state-determined performance measures. Many focused on a variety of educational contexts such as rural districts, high poverty high schools and charter schools. The approach can be used to guide decision-making by providing objective information to leadership about schools that may warrant a closer look either positively or out of concern. 
+
+| State | Performance Metric | Population |
+|:-----:|:------------------:|:----------:|
+| [Colorado](https://ies.ed.gov/ncee/edlabs/projects/project.asp?projectID=4498) | Achievement gap closure | Rural districts |
+| [Georgia](https://gosa.georgia.gov/accountability-0/beating-odds-analysis) | College and career readiness | All K-12 schools | 
+| [Florida](https://ies.ed.gov/ncee/edlabs/projects/project.asp?projectID=363) | Grade 3 reading | Public elementary schools |
+| [Michigan](https://www.michigan.gov/documents/mde/Beating_the_Odds_Business_Rules_548870_7.pdf) | State-defined performance measures | All K-12 schools |
+| [Mississippi](https://ies.ed.gov/ncee/edlabs/projects/project.asp?projectID=4465) | English language arts; math | Grade 3-8 public schools |
+| [Nebraska](https://ies.ed.gov/ncee/edlabs/projects/project.asp?projectID=4498) | Achievement gap closure | Rural districts |
+| [Puerto Rico](https://ies.ed.gov/ncee/edlabs/projects/project.asp?projectID=4468) | Graduation rate; reading; math | High poverty high schools |
+| [South Carolina](https://ies.ed.gov/ncee/edlabs/projects/project.asp?projectID=418) | English language arts; math | Charter schools |
 
 The purpose of this guide is to present a data-driven approach to identify beating-the-odds schools. We use multilevel models to predict student performance and school-level effects on that performance. Next, we compare each school's predicted performance to its actual performance. The school is identified as beating the odds if its actual performance is higher or lower than predicted by a statistically significant margin. The procedures presented in this guide parallel those used in a collaborative study by the [Kentucky Department of Education](https://education.ky.gov/) and [REL Appalachia](https://ies.ed.gov/ncee/edlabs/regions/appalachia/).
 
