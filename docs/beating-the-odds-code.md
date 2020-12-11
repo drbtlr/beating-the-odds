@@ -14,7 +14,7 @@ output:
     number_sections: no
 ---
 
-# Implementing a Beating-the-Odds Analysis 
+# Implementing a BTO Analysis 
 
 *A step-by-step guide to implementing a beating-the-odds (BTO) analysis using a multilevel framework. Programmed in R.*
 
@@ -34,9 +34,9 @@ In this guide, you will use statistical models to predict school performance bas
 
 ### Purpose and Overview of Analyses
 
-School leaders often want to identify promising practices that distinguish high-performing schools from their counterparts and facilitate the transfer of some of these practices to struggling schools. A beating-the-odds analysis is one approach school leaders can take to identify schools that perform better or worse than expected, given the unique student populations they serve. In general, beating-the-odds analyses predict school performance based on the demographic make up of schools’ student populations and then compare these predictions with actual school performance. Schools with observed performance that is statistically significantly greater than their predicted performance are typically considered to be performing better than expected, or beating the odds. Schools with observed performance that is statistically significantly less than their predicted performance meet the worse than expected criteria. 
+School leaders often want to identify promising practices that distinguish high-performing schools from their counterparts and facilitate the transfer of some of these practices to struggling schools. A BTO analysis is one approach school leaders can take to identify schools that perform better or worse than expected, given the unique student populations they serve. In general, BTO analyses predict school performance based on the demographic make up of schools’ student populations and then compare these predictions with actual school performance. Schools with observed performance that is statistically significantly greater than their predicted performance are typically considered to be performing better than expected, or beating the odds. Schools with observed performance that is statistically significantly less than their predicted performance meet the worse than expected criteria. 
 
-There are a number of examples of beating-the-odds analyses being used to identify schools exceeding expectations in achievement gap closure, reading, English language arts, math, graduation rate, and state-determined performance measures. Many focused on a variety of educational contexts such as rural districts, high poverty high schools and charter schools. The approach can be used to guide decision-making by providing objective information to leadership about schools that may warrant a closer look either positively or out of concern. 
+There are a number of examples of BTO analyses being used to identify schools exceeding expectations in achievement gap closure, reading, English language arts, math, graduation rate, and state-determined performance measures. Many focused on a variety of educational contexts such as rural districts, high poverty high schools, and charter schools. The approach can be used to guide decision-making by providing objective information to leadership about schools that may warrant a closer look either positively or out of concern. 
 
 | State | Performance Metric | Population |
 |:-----:|:------------------:|:----------:|
@@ -49,22 +49,23 @@ There are a number of examples of beating-the-odds analyses being used to identi
 | [Puerto Rico](https://ies.ed.gov/ncee/edlabs/projects/project.asp?projectID=4468) | Graduation rate; reading; math | High poverty high schools |
 | [South Carolina](https://ies.ed.gov/ncee/edlabs/projects/project.asp?projectID=418) | English language arts; math | Charter schools |
 
-The purpose of this guide is to present a data-driven approach to identify beating-the-odds schools. We use multilevel models to predict student performance and school-level effects on that performance. Next, we compare each school's predicted performance to its actual performance. The school is identified as beating the odds if its actual performance is higher or lower than predicted by a statistically significant margin. The procedures presented in this guide parallel those used in a collaborative study by the [Kentucky Department of Education](https://education.ky.gov/) and [REL Appalachia](https://ies.ed.gov/ncee/edlabs/regions/appalachia/).
+The purpose of this guide is to present a data-driven approach to identify BTO schools. We use multilevel models to predict student performance and school-level effects on that performance. Next, we compare each school's predicted performance to its actual performance. The school is identified as beating the odds if its actual performance is higher or lower than predicted by a statistically significant margin. The procedures presented in this guide are based on those used in a collaborative study by the [Kentucky Department of Education](https://education.ky.gov/) and [REL Appalachia](https://ies.ed.gov/ncee/edlabs/regions/appalachia/).
 
 ### Using this Guide
 
-This guide draws on SDP's ["Faketucky"](https://github.com/opensdp/faketucky), a synthetic dataset based on real student data, in the analysis. While these data are synthetic, the code is not. Schools and districts wanting to conduct their own beating-the-odds analysis can easily adapt the code provided in this guide to their own data.
+This guide draws on SDP's ["Faketucky"](https://github.com/opensdp/faketucky), a synthetic dataset based on real student data, in the analysis. While these data are synthetic, the code is not. Schools and districts wanting to conduct their own BTO analysis can easily adapt the code provided in this guide to their own data.
 
 To replicate or modify the analysis described in this guide, click the "Download" buttons to download R code and sample data. You can make changes to the charts using the code and sample data, or modify the code to work with your own data. If you are familiar with GitHub, you can click "Go to Repository" and clone the entire repository to your own computer. 
 
 We encourage you to go to our [Participate page](https://opensdp.github.io/participate/) to read about more ways to engage with the OpenSDP community or reach out for assistance in adapting this code for your specific context.
 
-### Installing and Loading R Packages and Plotting Themes
+### Installing and Loading R Packages
 
 To complete this tutorial, you will need R, R Studio, and the following R packages installed on your machine: 
 
 - `tidyverse`: For convenient data and output manipulation
 - `lme4`: To fit multilevel models
+- `merTools`: To extract expected ranks from fitted models
 - `glue`: To format and interpolate strings
 
 To install packages, such as `lme4`, run the following command in the R console:
@@ -78,6 +79,8 @@ After installing your R packages and downloading this guide's GitHub repository,
 
 ```r
 # Load packages
+# Note: We do not load the `merTools` package because it masks 
+# the `select` function from `dplyr` (found in `tidyverse`). 
 library(tidyverse)
 library(lme4)
 library(glue)
@@ -91,10 +94,10 @@ sdp_theme <- function() {
       plot.title.position = "plot",
       plot.subtitle = element_text(size = 14),
       axis.title = element_text(size = 12),
-      axis.text = element_text(size = 11),
+      axis.text = element_text(size = 12),
       legend.position = "top",
-      legend.text = element_text(size = 11),
-      strip.text = element_text(size = 11, face = "bold"),
+      legend.text = element_text(size = 12),
+      strip.text = element_text(size = 12),
       strip.background = element_rect(fill = "gray80", color = "gray80")
     )
 }
@@ -151,7 +154,7 @@ This guide is an open-source document hosted on GitHub and generated using R Mar
 
 ### Identify BTO Schools
 
-**Purpose:** This analysis illustrates how to identify schools that perform better or worse than expected, given the unique student populations they serve, using a beating-the-odds approach. 
+**Purpose:** This analysis illustrates how to identify schools that perform better or worse than expected, given the unique student populations they serve, using a BTO approach. 
 
 **Required Analysis File Variables:**
 
@@ -168,7 +171,7 @@ This guide is an open-source document hosted on GitHub and generated using R Mar
 - `scale_score_11_math`
 - `scale_score_11_read`
 
-**Analytic Technique:** We use multilevel models to predict student performance and school-level effects on that performance. There are a number of benefits to using a multilevel approach over a more traditional approach like ordinary least squares. In particular, a multilevel approach allows us to account for the hierarchical or nested structure of the data. In this case, student observations and school observations from different years are nested within schools. Additionally, recent beating-the-odds studies have used a multilevel approach with success (e.g., [Bowers, 2015](https://www.tandfonline.com/doi/full/10.1080/13632434.2014.962500); [Partridg, Rudo, & Herrera, 2017](https://eric.ed.gov/?id=ED572602)). 
+**Analytic Technique:** We use multilevel models to predict student performance and school-level effects on that performance. There are a number of benefits to using a multilevel approach over a more traditional approach like ordinary least squares. In particular, a multilevel approach allows us to account for the hierarchical or nested structure of the data. In this case, student observations and school observations from different years are nested within schools. Additionally, recent BTO studies have used a multilevel approach with success (e.g., [Bowers, 2015](https://www.tandfonline.com/doi/full/10.1080/13632434.2014.962500); [Partridg, Rudo, & Herrera, 2017](https://eric.ed.gov/?id=ED572602)). 
 
 We encourage you check out Gelman and Hill's book [Data Analysis Using Regression and Multilevel/Hierarchical Models](http://www.stat.columbia.edu/~gelman/arm/) if you're interested in learning more about multilevel models and their applications.
 
@@ -183,7 +186,7 @@ We encourage you check out Gelman and Hill's book [Data Analysis Using Regressio
 
 #### Step 1: Prepare data for analysis
 
-This beating-the-odds analysis uses a multilevel framework that incorporates school-level information into the modeling process. To prepare the analytical dataset, we calculated school averages within each school year. These variables where then centered using the grand mean of each variable. 
+This BTO analysis uses a multilevel framework that incorporates school-level information into the modeling process. To prepare the analytical dataset, we calculated school averages within each school year. These variables were then centered using the grand mean of each variable. We centered variables to aid in the interpretation of the school intercepts.
 
 *Note:* We recognize that grand-mean centering may not be an appropriate option for your analysis. We encourage you to explore other centering techniques for multilevel modeling. Gelman and Hill's [Data Analysis Using Regression and Multilevel/Hierarchical Models](http://www.stat.columbia.edu/~gelman/arm/) and Raudenbush and Bryk's [Hierarchical Linear Models](https://us.sagepub.com/en-us/nam/hierarchical-linear-models/book9230) provide further details on the different centering techniques as well as the advantages and disadvantages of their use in multilevel modeling. 
 
@@ -250,7 +253,7 @@ sch_avg_center <- cohort_avg %>%
 
 #### Step 2: Fit multilevel models
 
-Multilevel models are a powerful and flexible extension to conventional regression frameworks. This is one of the many reasons why they are so attractive to education researchers. However, this added flexibility can make fitting and interpreting such models a challenge. Here, we present a relatively simple multilevel model that takes into account school-level variation. We encourage you to read more on the topic of multilevel modeling and its application in beating-the-odds analyses. 
+Multilevel models are a powerful and flexible extension to conventional regression frameworks. This is one of the many reasons why they are so attractive to education researchers. However, this added flexibility can make fitting and interpreting such models a challenge. Here, we present a relatively simple multilevel model that takes into account school-level variation. We encourage you to read more on the topic of multilevel modeling and its application in BTO analyses. 
 
 We fit a two-level multilevel model for each subject area outcome of interest -- ACT math and reading -- using the `lmer` function in the `lme4` package. Specifically, these models use a random intercept framework, which allows the school-level intercept to vary randomly around a cross-school mean. We recommend you read the [lme4 Reference Manual](https://cran.r-project.org/web/packages/lme4/lme4.pdf) and vignette [Fitting Linear Mixed-Effects Models Using lme4](https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf) before you fit your models. These resources contain a wealth of information. 
 
@@ -266,9 +269,7 @@ m_math <- lmer(
     sch_sped_center + sch_lep_center + sch_gifted_center +
     sch_8_math_center + flag_2010_cohort + (1|first_hs_code),
   # Call dataframe containing the variables named in formula
-  data = sch_avg_center, 
-  # Option to use restricted maximum likelihood (REML) estimates
-  REML = TRUE
+  data = sch_avg_center
 )
 
 m_read <- lmer(
@@ -278,7 +279,7 @@ m_read <- lmer(
     sch_male_center + sch_white_center + sch_frpl_center +
     sch_sped_center + sch_lep_center + sch_gifted_center +
     sch_8_read_center + flag_2010_cohort + (1|first_hs_code),
-  data = sch_avg_center, REML = TRUE
+  data = sch_avg_center
 )
 ```
 
@@ -340,10 +341,10 @@ flag_2010_cohort   0.3110568  0.0250484  12.418
 
 ```r
 # Remove the comment (#) below to print a summary of the reading model 
-#summary(m_read)
+# summary(m_read)
 ```
 
-Visual diagnostic plots are another way to inspect the quality of your model. Using a helpful plotting function found in the [merTools package](https://cran.r-project.org/web/packages/merTools/index.html), we plot the results of a simulation of random effects for each model. Look for variation and confidence bands (dark bars) that do not overlap the red line for zero. Here, we established that a number of school effects are meaningfully from zero.
+Visual diagnostic plots are another way to inspect the quality of your model. Using a helpful plotting function found in the [merTools package](https://cran.r-project.org/web/packages/merTools/index.html), we plot the results of a simulation of random effects for each model. Look for variation and confidence bands (dark bars) that do not overlap the red line for zero. Here, we established that a number of school effects are meaningfully different from zero.
 
 *Note:* We do not load the `merTools` package because it masks the `select` function from `dplyr` (found in `tidyverse`). Instead, we chose to call individual functions directly from `merTools` using the `::` operator (e.g., `merTools::plotREsim`). This is a handy workaround when dealing with packages with conflicting functions.  
 
@@ -357,14 +358,14 @@ merTools::plotREsim(merTools::REsim(m_math, n.sims = 100), stat = "median", sd =
 
 ```r
 # Remove comment (#) below to plot random effects for the reading model
-#merTools::plotREsim(merTools::REsim(m_read, n.sims = 100), stat = "median", sd = TRUE)
+# merTools::plotREsim(merTools::REsim(m_read, n.sims = 100), stat = "median", sd = TRUE)
 ```
 
-#### Step 4: Calculate statistics for beating-the-odds schools
+#### Step 4: Calculate statistics for BTO schools
 
-We used a measure "expected rank" to identify beating-the-odds schools. Expected rank provides the percentile ranks for the observed groups (i.e., schools) in the random effect distribution taking into account both the magnitude and uncertainty of the estimated effect for each group. Incorporating magnitude and uncertainty in the beating-the-odds process is a key advantage of using this technique when assessing the performance of schools with small student populations. Estimates for small schools are more uncertain due to having few student observations. A beating-the-odds analysis that relies only on the confidence internal and point estimates biases the results towards small schools with uncertain, but very large positive values. Using expected ranks mitigates these biases.
+We used a measure called "expected rank" to identify BTO schools. Expected rank provides the percentile ranks for the observed groups (i.e., schools) in the random effect distribution taking into account both the magnitude and uncertainty of the estimated effect for each group. Incorporating magnitude and uncertainty in the BTO process is a key advantage of using this technique when assessing the performance of schools with small student populations. Estimates for small schools are more uncertain due to having few student observations. A BTO analysis that relies only on confidence intervals and point estimates biases the results towards small schools with uncertain, but very large positive values. Using expected ranks mitigates these biases.
 
-We extracted the expected rank and more reliable confidence intervals is possible using the `merTools` package's `REsim` and `expectedRank` functions. Next, we identified schools as beating the odds if they were above the 70th percentile of all schools. Conversely, schools were identified as performing worse than expected if they were below the 30th percentile.
+We extracted the expected rank and more reliable confidence intervals using the `merTools` package's `REsim` and `expectedRank` functions. Next, we identified schools as beating the odds if they were above the 70th percentile of all schools. Conversely, schools were identified as performing worse than expected if they were below the 30th percentile.
 
 #### Calculate school-level expected ranks
 
@@ -381,11 +382,9 @@ ranks_read <- merTools::expectedRank(m_read, groupFctr = "first_hs_code")
 calc_bto <- function(.ranks, .var) {
   # Input model expected ranks
   .ranks %>%
-    # Calculate confidence intervals
-    mutate(ci_high = estimate + std.error,
-           ci_low = estimate - std.error) %>% 
     # Flag schools that perform above/below benchmark (i.e., BTOs)
-    mutate(bto = ifelse(pctER >= 70 | pctER < 30, "yes", "no")) %>% # assume math/read have same cut offs
+    # assume math/read have same cut offs
+    mutate(bto = ifelse(pctER >= 70 | pctER < 30, "yes", "no")) %>% 
     # Select and name variables of interest
     select(first_hs_code = groupLevel, "estimate_{{ .var }}" := estimate, 
            "pctER_{{ .var }}" := pctER, "bto_{{ .var }}" := bto)
@@ -418,7 +417,7 @@ sch_names <- faketucky %>%
 sch_bto_data <- left_join(sch_names, bto_read_math, by = "first_hs_code")
 ```
 
-#### Step 5: Plot beating-the-odds schools
+#### Step 5: Plot BTO schools
 
 It's always helpful to plot the results of your analysis. We've found a nice scatter plot can be an effective visualization for communicating the overall results of the analysis. 
 
@@ -426,40 +425,39 @@ It's always helpful to plot the results of your analysis. We've found a nice sca
 ```r
 # Create scatter plot math/read residuals
 sch_bto_data %>% 
-  mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes",
-                          "Performed Better/Worse than Expected", "Performed as Expected")) %>%
-  filter(!is.na(bto_both)) %>%
-  ggplot(aes(estimate_math, estimate_read, color = bto_both)) +
+  mutate(bto_type = case_when(
+    bto_math == "yes" & bto_read == "yes" ~ "Math AND Reading",
+    bto_math == "yes" | bto_read == "yes" ~ "Math OR Reading",
+    TRUE ~ "Neither/Not BTO"
+  )) %>% 
+  ggplot(aes(estimate_math, estimate_read, color = bto_type)) +
   geom_point(size = 2, alpha = .6) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_hline(yintercept = 0, linetype = "dashed") +
-  scale_color_manual(values = c("#999999", "#E69F00")) +
+  scale_color_manual(values = c("#E69F00", "#0049E6", "#999999")) +
   sdp_theme() +
   theme(panel.grid = element_line(color = "grey92")) +
   labs(x = "Math Residual", y = "Reading Residual", color = "",
-       title = "Beating-the-Odds Schools in Math and Reading")
+       title = "Schools that Performed Better/Worse that Expected in Math and Reading")
 ```
 
 <img src="../figure/E_plot-bto-1.png" style="display: block; margin: auto;" />
 
 ### BTO schools by performance level
 
-**Purpose:** This analysis examines the distribution of beating-the-odds schools in math and reading and establishes performance levels (e.g., small, medium, or large changes in between the predicted and actual school performance). Results provide an overall summary of a beating-the-odds analysis.  
+**Purpose:** This analysis examines the distribution of BTO schools in math and reading and establishes performance levels (e.g., small, medium, or large changes in between the predicted and actual school performance). Results provide an overall summary of a BTO analysis.  
 
 **Required Analysis File Variables:**
 
-- `resid_math`
-- `resid_read`
-- `bto_math`
-- `bto_read`
+- `first_hs_code`
+- `pctER_math` (calculated field from BTO analysis)
+- `pctER_read` (calculated field from BTO analysis)
 
 **Ask Yourself**
 
 - How many schools are performing better than expected given their student characteristics? How many are performing worse than expected?
 - How large or small are the differences between schools' predicted performances and actual performances?
 - How does school performance vary by subject area?
-
-**Possible Next Steps or Action Plans:** Identify which schools are performing at different levels. Develop academic plan for schools at each performance level.
 
 **Analytic Technique:** Determining reasonable cut points for performance categories (such as small, medium, or large). Count the number of schools by performance level and plot a matrix to compare school performance across subject areas.  
 
@@ -474,6 +472,8 @@ There are a number of ways to establish performance levels. Examples include ref
 - Small performance decrease = 20th to 29th percentile
 - Medium performance decrease = 10th to 19th percentile
 - Large performance decrease = 9th percentile or below
+
+**Possible Next Steps or Action Plans:** Identify which schools are performing at different levels. Develop academic plan for schools at each performance level.
 
 
 ```r
@@ -552,7 +552,7 @@ bto_perform_lvl %>%
   sdp_theme() +
   theme(panel.grid.major.y = element_line(color = "grey92")) +
   labs(x = "Performance Level", y = "Number of Schools", fill = "",
-       title = "Distribution of Beating-the-Odds Schools in Math and Reading") 
+       title = "Distribution of School Performance Categories for Math and Reading") 
 ```
 
 <img src="../figure/E_unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
@@ -585,12 +585,10 @@ bto_perform_lvl %>%
 
 - `first_hs_code`
 - `chrt_ninth`
-- `scale_score_8_math` 
-- `scale_score_8_read`
-- `resid_math`
-- `resid_read`
-- `bto_math`
-- `bto_read`
+- `scale_score_11_math` 
+- `scale_score_11_read`
+- `bto_math` (calculated field from BTO analysis)
+- `bto_read` (calculated field from BTO analysis)
 
 **Ask Yourself**
 
@@ -630,21 +628,22 @@ prior_achieve_bto <- bto_perform_lvl %>%
 
 ```r
 prior_achieve_bto %>% 
-  mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes",
-                          "Performed Better than\nExpected in Math & Reading", 
-                          "Performed as Expected\nExpected in Math & Reading")) %>% 
-  filter(!is.na(bto_both)) %>% 
+  mutate(bto_type = case_when(
+    bto_math == "yes" & bto_read == "yes" ~ "Math AND Reading",
+    bto_math == "yes" | bto_read == "yes" ~ "Math OR Reading",
+    TRUE ~ "Neither/Not BTO"
+  )) %>% 
   ggplot(aes(rank_11_math, rank_11_read)) + 
-  geom_point(aes(color = bto_both),
+  geom_point(aes(color = bto_type),
              size = 2, alpha = .6) +
   geom_vline(xintercept = 50, linetype = "dashed") +
   geom_hline(yintercept = 50, linetype = "dashed") +
-  scale_color_manual(values = c("#999999", "#E69F00")) +
+  scale_color_manual(values = c("#E69F00", "#0049E6", "#999999")) +
   sdp_theme() +
   labs(x = "Prior Performance - Math (Percentile Rank)", 
        y = "Prior Performance - Reading (Percentile Rank)", 
        color = "",
-       title = "Prior Performance by Beating-the-Odds Status")
+       title = "Prior Performance by BTO Status")
 ```
 
 <img src="../figure/E_plot-prior-perf-1.png" style="display: block; margin: auto;" />
@@ -655,13 +654,14 @@ prior_achieve_bto %>%
 
 **Required Analysis File Variables:**
 
+- `first_hs_code`
 - `chrt_ninth`
 - `sch_white`
 - `sch_frpl`
 - `sch_sped`
 - `sch_lep`
-- `resid_math`
-- `resid_read`
+- `perform_lvl_math` (calculated field from BTO analysis)
+- `perform_lvl_read` (calculated field from BTO analysis)
 
 **Ask Yourself**
 
@@ -674,29 +674,36 @@ prior_achieve_bto %>%
 
 
 ```r
-prop_stn_perform_lvl <- bto_perform_lvl %>% 
-  # Label BTO schools
-  mutate(perform_high_low = case_when(
-    perform_lvl_math > 0 ~ "Math_High Performing",
-    perform_lvl_math < 0 ~ "Math_Low Performing",
-    perform_lvl_read > 0 ~ "Reading_High Performing",
-    perform_lvl_read < 0 ~ "Reading_Low Performing",
-    TRUE ~ NA_character_
-  )) %>% 
-  # Merge with school demographics
-  left_join(sch_avg_by_cohort %>% 
-              filter(chrt_ninth == 2010) %>% 
-              mutate(first_hs_code = factor(first_hs_code))) %>% 
-  drop_na(perform_high_low) %>% 
-  # Calculate proportions by performance level
-  group_by(perform_high_low) %>% 
-  summarise(prop_white = mean(sch_white, na.rm = TRUE),
-            prop_frpl = mean(sch_frpl, na.rm = TRUE),
-            prop_sped = mean(sch_sped, na.rm = TRUE),
-            prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
-  # Convert to long format for plotting
-  pivot_longer(cols = starts_with("prop")) %>% 
-  rename(group = perform_high_low)
+# Create function to calculate proportions by subject area
+calc_props <- function(.perform_lvl_subject, .subject_lbl) {
+  # Call BTO performance levels
+  bto_perform_lvl %>% 
+    # Label BTO schools
+    mutate(perform_high_low = case_when(
+      {{ .perform_lvl_subject }} > 0 ~ glue("{.subject_lbl}_High Performing"),
+      {{ .perform_lvl_subject }} < 0 ~ glue("{.subject_lbl}_Low Performing"),
+      {{ .perform_lvl_subject }} == 0 ~ glue("{.subject_lbl}_Neither High/Low"),
+      TRUE ~ NA_character_
+    )) %>% 
+    # Merge with school demographics
+    left_join(sch_avg_by_cohort %>% 
+                filter(chrt_ninth == 2010) %>% 
+                mutate(first_hs_code = factor(first_hs_code))) %>% 
+    drop_na(perform_high_low) %>% 
+    # Calculate proportions by performance level
+    group_by(perform_high_low) %>% 
+    summarise(prop_white = mean(sch_white, na.rm = TRUE),
+              prop_frpl = mean(sch_frpl, na.rm = TRUE),
+              prop_sped = mean(sch_sped, na.rm = TRUE),
+              prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
+    # Convert to long format for plotting
+    pivot_longer(cols = starts_with("prop")) %>% 
+    rename(group = perform_high_low)
+}
+
+# Execute function for math/read and append
+prop_stn_perform_lvl <- bind_rows(calc_props(perform_lvl_math, "Math"),
+                                  calc_props(perform_lvl_read, "Reading"))
 ```
 
 #### Plot school demographics by performance level
@@ -705,7 +712,7 @@ prop_stn_perform_lvl <- bto_perform_lvl %>%
 ```r
 prop_stn_perform_lvl %>%
   separate(group, into = c("subject", "group"), sep = "_") %>% 
-  mutate(group = fct_relevel(group, "Low Performing", "High Performing")) %>% 
+  mutate(group = fct_relevel(group, "Low Performing", "High Performing", "Neither High/Low")) %>% 
   mutate(value = round(value * 100, 1)) %>% 
   mutate(name = case_when(
     name == "prop_white" ~ "White",
@@ -719,7 +726,7 @@ prop_stn_perform_lvl %>%
             position = position_dodge(.85), vjust = -.45) +
   expand_limits(y = c(0, 100)) +
   facet_wrap(~ subject, nrow = 2) +
-  scale_fill_manual(values = c("#999999", "#E69F00")) +
+  scale_fill_manual(values = c("#E69F00", "#0049E6", "#999999")) +
   sdp_theme() +
   theme(panel.grid.major.y = element_line(color = "grey92")) +
   labs(x = "Student Group", y = "Percent of Students", fill = "",
