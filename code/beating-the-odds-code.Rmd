@@ -103,10 +103,10 @@ sdp_theme <- function() {
       plot.title.position = "plot",
       plot.subtitle = element_text(size = 14),
       axis.title = element_text(size = 12),
-      axis.text = element_text(size = 11),
+      axis.text = element_text(size = 12),
       legend.position = "top",
-      legend.text = element_text(size = 11),
-      strip.text = element_text(size = 11, face = "bold"),
+      legend.text = element_text(size = 12),
+      strip.text = element_text(size = 12),
       strip.background = element_rect(fill = "gray80", color = "gray80")
     )
 }
@@ -375,18 +375,20 @@ It's always helpful to plot the results of your analysis. We've found a nice sca
 ```{r plot-bto, echo=TRUE}
 # Create scatter plot math/read residuals
 sch_bto_data %>% 
-  mutate(bto_both = ifelse(bto_math == "yes" & bto_read == "yes",
-                          "Performed Better/Worse than Expected", "Performed as Expected")) %>%
-  filter(!is.na(bto_both)) %>%
-  ggplot(aes(estimate_math, estimate_read, color = bto_both)) +
+  mutate(bto_type = case_when(
+    bto_math == "yes" & bto_read == "yes" ~ "Math AND Reading",
+    bto_math == "yes" | bto_read == "yes" ~ "Math OR Reading",
+    TRUE ~ "Neither/Not BTO"
+  )) %>% 
+  ggplot(aes(estimate_math, estimate_read, color = bto_type)) +
   geom_point(size = 2, alpha = .6) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_hline(yintercept = 0, linetype = "dashed") +
-  scale_color_manual(values = c("#999999", "#E69F00")) +
+  scale_color_manual(values = c("#E69F00", "#0049E6", "#999999")) +
   sdp_theme() +
   theme(panel.grid = element_line(color = "grey92")) +
   labs(x = "Math Residual", y = "Reading Residual", color = "",
-       title = "Beating-the-Odds Schools in Math and Reading")
+       title = "Schools that Performed Better/Worse that Expected in Math and Reading")
 ```
 
 ### BTO schools by performance level
