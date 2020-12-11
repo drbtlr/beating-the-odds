@@ -607,29 +607,36 @@ prior_achieve_bto %>%
 #### Calculate the proportion of students by performance level
 
 ```{r bto-demos-data, echo=TRUE}
-prop_stn_perform_lvl <- bto_perform_lvl %>% 
-  # Label BTO schools
-  mutate(perform_high_low = case_when(
-    perform_lvl_math > 0 ~ "Math_High Performing",
-    perform_lvl_math < 0 ~ "Math_Low Performing",
-    perform_lvl_read > 0 ~ "Reading_High Performing",
-    perform_lvl_read < 0 ~ "Reading_Low Performing",
-    TRUE ~ NA_character_
-  )) %>% 
-  # Merge with school demographics
-  left_join(sch_avg_by_cohort %>% 
-              filter(chrt_ninth == 2010) %>% 
-              mutate(first_hs_code = factor(first_hs_code))) %>% 
-  drop_na(perform_high_low) %>% 
-  # Calculate proportions by performance level
-  group_by(perform_high_low) %>% 
-  summarise(prop_white = mean(sch_white, na.rm = TRUE),
-            prop_frpl = mean(sch_frpl, na.rm = TRUE),
-            prop_sped = mean(sch_sped, na.rm = TRUE),
-            prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
-  # Convert to long format for plotting
-  pivot_longer(cols = starts_with("prop")) %>% 
-  rename(group = perform_high_low)
+# Create function to calculate proportions by subject area
+calc_props <- function(.perform_lvl_subject, .subject_lbl) {
+  # Call BTO performance levels
+  bto_perform_lvl %>% 
+    # Label BTO schools
+    mutate(perform_high_low = case_when(
+      {{ .perform_lvl_subject }} > 0 ~ glue("{.subject_lbl}_High Performing"),
+      {{ .perform_lvl_subject }} < 0 ~ glue("{.subject_lbl}_Low Performing"),
+      {{ .perform_lvl_subject }} == 0 ~ glue("{.subject_lbl}_Neither High/Low"),
+      TRUE ~ NA_character_
+    )) %>% 
+    # Merge with school demographics
+    left_join(sch_avg_by_cohort %>% 
+                filter(chrt_ninth == 2010) %>% 
+                mutate(first_hs_code = factor(first_hs_code))) %>% 
+    drop_na(perform_high_low) %>% 
+    # Calculate proportions by performance level
+    group_by(perform_high_low) %>% 
+    summarise(prop_white = mean(sch_white, na.rm = TRUE),
+              prop_frpl = mean(sch_frpl, na.rm = TRUE),
+              prop_sped = mean(sch_sped, na.rm = TRUE),
+              prop_lep = mean(sch_lep, na.rm = TRUE)) %>% 
+    # Convert to long format for plotting
+    pivot_longer(cols = starts_with("prop")) %>% 
+    rename(group = perform_high_low)
+}
+
+# Execute function for math/read and append
+prop_stn_perform_lvl <- bind_rows(calc_props(perform_lvl_math, "Math"),
+                                  calc_props(perform_lvl_read, "Reading"))
 ```
 
 #### Plot school demographics by performance level
@@ -637,7 +644,7 @@ prop_stn_perform_lvl <- bto_perform_lvl %>%
 ```{r bto-demo-plot, echo=TRUE}
 prop_stn_perform_lvl %>%
   separate(group, into = c("subject", "group"), sep = "_") %>% 
-  mutate(group = fct_relevel(group, "Low Performing", "High Performing")) %>% 
+  mutate(group = fct_relevel(group, "Low Performing", "High Performing", "Neither High/Low")) %>% 
   mutate(value = round(value * 100, 1)) %>% 
   mutate(name = case_when(
     name == "prop_white" ~ "White",
@@ -651,7 +658,7 @@ prop_stn_perform_lvl %>%
             position = position_dodge(.85), vjust = -.45) +
   expand_limits(y = c(0, 100)) +
   facet_wrap(~ subject, nrow = 2) +
-  scale_fill_manual(values = c("#999999", "#E69F00")) +
+  scale_fill_manual(values = c("#E69F00", "#0049E6", "#999999")) +
   sdp_theme() +
   theme(panel.grid.major.y = element_line(color = "grey92")) +
   labs(x = "Student Group", y = "Percent of Students", fill = "",
