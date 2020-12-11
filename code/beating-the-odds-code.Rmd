@@ -633,10 +633,19 @@ calc_props <- function(.perform_lvl_subject, .subject_lbl) {
     pivot_longer(cols = starts_with("prop")) %>% 
     rename(group = perform_high_low)
 }
+```
 
-# Execute function for math/read and append
-prop_stn_perform_lvl <- bind_rows(calc_props(perform_lvl_math, "Math"),
-                                  calc_props(perform_lvl_read, "Reading"))
+#### Execute function for each subject
+
+```{r}
+prop_math <- calc_props(perform_lvl_math, "Math")
+prop_read <- calc_props(perform_lvl_read, "Reading")
+```
+
+#### Merge datasets for plotting
+
+```{r}
+prop_stn_perform_lvl <- bind_rows(prop_math, prop_read)
 ```
 
 #### Plot school demographics by performance level
