@@ -397,10 +397,9 @@ sch_bto_data %>%
 
 **Required Analysis File Variables:**
 
-- `resid_math`
-- `resid_read`
-- `bto_math`
-- `bto_read`
+- `first_hs_code`
+- `pctER_math` (calculated field from BTO analysis)
+- `pctER_read` (calculated field from BTO analysis)
 
 **Ask Yourself**
 
@@ -525,12 +524,10 @@ bto_perform_lvl %>%
 
 - `first_hs_code`
 - `chrt_ninth`
-- `scale_score_8_math` 
-- `scale_score_8_read`
-- `resid_math`
-- `resid_read`
-- `bto_math`
-- `bto_read`
+- `scale_score_11_math` 
+- `scale_score_11_read`
+- `bto_math` (calculated field from BTO analysis)
+- `bto_read` (calculated field from BTO analysis)
 
 **Ask Yourself**
 
@@ -591,13 +588,14 @@ prior_achieve_bto %>%
 
 **Required Analysis File Variables:**
 
+- `first_hs_code`
 - `chrt_ninth`
 - `sch_white`
 - `sch_frpl`
 - `sch_sped`
 - `sch_lep`
-- `resid_math`
-- `resid_read`
+- `perform_lvl_math` (calculated field from BTO analysis)
+- `perform_lvl_read` (calculated field from BTO analysis)
 
 **Ask Yourself**
 
